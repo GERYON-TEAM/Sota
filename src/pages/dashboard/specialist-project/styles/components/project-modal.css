@@ -1,0 +1,61 @@
+/* Used by: src/pages/dashboard/specialist-project/components/ProjectDescriptionModal.tsx */
+.project-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 60;
+}
+
+.project-modal {
+  position: absolute;
+  width: 637px;
+  height: 796px;
+  left: calc(50% - 637px / 2 + 0.5px);
+  top: calc(50% - 796px / 2);
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px 24px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+.project-modal__head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.project-modal__head h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #0b1215;
+}
+
+.project-modal__close {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.project-modal__body {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #0b1215;
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-y: auto;
+  max-height: 100%;
+  word-break: break-word;
+}
+
+.project-modal__body p {
+  margin: 0;
+}

@@ -1,0 +1,18 @@
+/* Used by: src/pages/specialist-portfolio/components/Sidebar.tsx (via src/pages/specialist-portfolio/styles/index.css) */
+.sidebar .dash-item {
+  background: transparent;
+}
+
+.dash-item-wrap {
+  display: inline-flex;
+  border-radius: 15px;
+  padding: 6px;
+}
+
+.dash-item-wrap.is-portfolio {
+  background: #ffffff;
+}
+
+.dash-item-wrap .dash-item {
+  color: #0b1215;
+}

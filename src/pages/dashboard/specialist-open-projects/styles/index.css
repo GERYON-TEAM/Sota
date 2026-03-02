@@ -1,0 +1,5 @@
+@import './components/header.css';
+@import './components/search.css';
+@import './components/sort.css';
+@import './components/grid.css';
+@import './components/filter-modal.css';

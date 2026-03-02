@@ -1,0 +1,52 @@
+/* Used by: src/pages/dashboard/specialist-dashboard/SpecialistDashboardPage.tsx */
+.dashboard-content {
+  padding: 48px;
+  min-width: 0;
+  overflow-x: hidden;
+  margin-left: 300px;
+}
+
+.dashboard-surface {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 32px;
+  margin-top: 16px;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-header::after {
+  content: '';
+  position: absolute;
+  left: calc(-48px - 300px);
+  right: -48px;
+  bottom: 0;
+  height: 3px;
+  background: #f8f9fd;
+  z-index: 0;
+}
+
+.dashboard-content h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .dashboard-content {
+    margin-left: 0;
+  }
+
+  .dashboard-header::after {
+    left: -48px;
+    right: -48px;
+  }
+}

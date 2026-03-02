@@ -1,0 +1,19 @@
+/* Used by: src/pages/specialist-portfolio/SpecialistPortfolioPage.tsx */
+@import './layout.css';
+@import './components/profile-card.css';
+@import './base.css';
+@import './components/completed-projects.css';
+@import './components/skills-section.css';
+@import './components/goals-section.css';
+@import './ui/empty-state.css';
+@import './common.css';
+@import './components/filters.css';
+@import './components/reviews.css';
+@import './typography.css';
+@import './modals/modal-base.css';
+@import './utilities.css';
+@import './ui/icons.css';
+@import './components/header-bar.css';
+@import './modals/edit-profile.css';
+@import './modals/edit-skill.css';
+@import './modals/edit-goal.css';

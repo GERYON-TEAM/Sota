@@ -1,0 +1,5 @@
+/* Used by: src/pages/dashboard/specialist-project/SpecialistProjectPage.tsx */
+@import './components/project-stats.css';
+@import './components/project-details.css';
+@import './components/project-customer.css';
+@import './components/project-modal.css';

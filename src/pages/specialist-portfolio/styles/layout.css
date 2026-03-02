@@ -1,0 +1,9 @@
+/* Used by: src/pages/specialist-portfolio/styles/index.css */
+.portfolio-surface {
+  width: 100%;
+  min-height: calc(100vh - 96px);
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 32px;
+  box-sizing: border-box;
+}

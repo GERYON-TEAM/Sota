@@ -1,0 +1,126 @@
+.dashboard--customer .contact-icon--wide {
+  width: 180px;
+  height: 54px;
+}
+
+.dashboard--customer .contact-icon--wide svg {
+  width: 180px;
+  height: 54px;
+  display: block;
+}
+
+.dashboard--customer .portfolio-filters .active-filter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 210px;
+  height: 36px;
+  padding: 10px;
+  border: 1px solid #e8e9ee;
+  border-radius: 15px;
+  background: #ffffff;
+  color: #696e82;
+  font-size: 14px;
+  position: relative;
+  cursor: pointer;
+  overflow: visible;
+}
+
+.dashboard--customer .portfolio-filters .active-filter__icon,
+.dashboard--customer .portfolio-filters .active-filter__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 200ms ease;
+  flex: 0 0 auto;
+}
+
+.dashboard--customer .portfolio-filters .active-filter__text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.dashboard--customer .portfolio-filters .active-filter.is-open .active-filter__chevron {
+  transform: rotate(180deg);
+}
+
+.dashboard--customer .portfolio-filters .deadline-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 300px;
+  height: 100px;
+  padding: 6px;
+  background: #ffffff;
+  border: 1px solid #a8b1ce;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+  border-radius: 20px;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 5;
+}
+
+.dashboard--customer .portfolio-filters .deadline-menu.is-open {
+  display: flex;
+}
+
+.dashboard--customer .portfolio-filters .deadline-item {
+  width: 100%;
+  height: 44px;
+  background: transparent;
+  border-radius: 20px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 4px 16px;
+  color: #0b1215;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dashboard--customer .portfolio-filters .deadline-item__icon,
+.dashboard--customer .portfolio-filters .deadline-item__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard--customer .portfolio-filters .deadline-item__check {
+  margin-left: auto;
+}
+
+.dashboard--customer .portfolio-filters .deadline-item__text {
+  white-space: nowrap;
+}
+
+.dashboard--customer .project-role--chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 16px;
+  height: 40px;
+  border: 1px solid #5260ff;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #5260ff;
+  width: auto;
+  box-sizing: border-box;
+}
+
+.dashboard--customer .lead-role,
+.dashboard--customer .portfolio-user__level {
+  white-space: nowrap;
+}
+
+.dashboard--customer .lead-card {
+  width: auto;
+  display: inline-flex;
+  align-self: flex-start;
+  max-width: 100%;
+}

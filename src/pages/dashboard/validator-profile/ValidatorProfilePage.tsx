@@ -1,0 +1,281 @@
+import { useEffect, useMemo, useState } from 'react'
+import CustomerHeaderBar from '../customer-dashboard/components/CustomerHeaderBar'
+import '../customer-dashboard/styles/index.css'
+import '../specialist-dashboard/styles/index.css'
+import '../validator-queue/styles/index.css'
+import '../specialist-profile/styles/index.css'
+import { useDashboardDropdowns } from '../specialist-dashboard/hooks/useDashboardDropdowns'
+import { useProfileTabs } from '../specialist-profile/hooks/useProfileTabs'
+import { useProfileDraft } from '../specialist-profile/hooks/useProfileDraft'
+import { useAvatarUpload } from '../specialist-profile/hooks/useAvatarUpload'
+import ProfileTabs from '../specialist-profile/components/ProfileTabs'
+import ProfilePanel from '../specialist-profile/components/ProfilePanel'
+import EditFieldModal from '../specialist-profile/components/modals/EditFieldModal'
+import ConfirmModal from '../specialist-profile/components/modals/ConfirmModal'
+
+function ValidatorSidebar() {
+  const path = window.location.pathname.toLowerCase()
+  const isQueue = path === '/queue/validator' || path === '/dashboard/validator'
+  const isProfile = path === '/queue/validator/profile' || path === '/dashboard/validator/profile'
+
+  return (
+    <aside className="sidebar validator-sidebar">
+      <div className="sidebar-logo">
+        <svg width="109" height="36" viewBox="0 0 109 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path
+            d="M17.5486 0.760151C17.5486 0.27147 17.9787 -0.107923 18.4437 0.0278454C18.6737 0.09499 18.9009 0.175472 19.124 0.269284L31.3641 7.13849C32.3706 8.10711 33.0418 9.38802 33.2626 10.7863V25.0234C33.0417 26.4214 32.3705 27.7019 31.3642 28.6704L19.1229 35.5402C18.9001 35.6338 18.6734 35.7141 18.4437 35.7812C17.9787 35.9169 17.5486 35.5375 17.5486 35.0489V0.760151Z"
+            fill="#5260FF"
+          />
+          <path
+            d="M15.5544 34.9742C15.5544 35.4753 15.1035 35.8572 14.6331 35.6973C14.2966 35.5829 13.9674 35.4393 13.6491 35.2666L12.8282 34.821L10.9169 33.6974C9.89124 33.1332 9.2529 32.0483 9.2529 30.8692V4.93965C9.25292 3.76055 9.89122 2.67561 10.9169 2.11145L12.8229 0.990959L13.6491 0.542605C13.9674 0.369818 14.2967 0.226177 14.6332 0.111687C15.1035 -0.0483587 15.5544 0.33356 15.5544 0.834595V34.9742Z"
+            fill="#5260FF"
+          />
+          <path
+            d="M8.29571 30.9319C8.29571 31.5365 7.66018 31.9254 7.12913 31.6458L5.17376 30.6162C4.14805 30.052 3.50972 28.806 3.50972 27.6269V8.19073C3.50974 7.01162 4.14804 5.76566 5.17376 5.2015L7.12916 4.17198C7.66021 3.89238 8.29571 4.28129 8.29571 4.88589V30.9319Z"
+            fill="#5260FF"
+          />
+          <path
+            d="M2.71206 27.574C2.71206 28.2251 2.01046 28.5668 1.59863 28.0656C0.649982 26.9111 4.66563e-06 25.3533 0 24.0082V11.801C6.5227e-08 10.2947 0.605057 8.81955 1.55989 7.66527C1.98097 7.15623 2.71206 7.50465 2.71206 8.16782V27.574Z"
+            fill="#5260FF"
+          />
+          <path
+            d="M91.5547 27.4791L98.1227 8.33057H101.667L108.261 27.4791H105.212L103.935 23.639H95.8813L94.6041 27.4791H91.5547ZM96.6892 21.105H103.127L100.234 12.6148L99.9211 11.5438L99.5823 12.6148L96.6892 21.105Z"
+            fill="#0B1215"
+          />
+          <path
+            d="M93.2248 8.33057V11.1258H87.4486V27.4791H84.3504V11.1258H78.5742V8.33057H93.2248Z"
+            fill="#0B1215"
+          />
+          <path
+            d="M68.6677 10.8896C65.0008 10.8896 61.7239 13.5493 61.7239 17.9821C61.7239 22.2324 64.7407 25.0224 68.6677 25.0224C72.6207 25.0224 75.6375 22.2324 75.6375 17.9821C75.6375 13.5493 72.3607 10.8896 68.6677 10.8896ZM58.7852 17.956C58.7852 12.402 62.7902 8.07349 68.6677 8.07349C74.5452 8.07349 78.5763 12.402 78.5763 17.956C78.5763 23.51 74.8573 27.8646 68.6677 27.8646C62.5041 27.8646 58.7852 23.51 58.7852 17.956Z"
+            fill="#0B1215"
+          />
+          <path
+            d="M51.0903 27.8645C47.3871 27.8645 44.892 25.7124 44.2617 22.983L46.9406 21.8282C47.4922 23.9015 48.9367 25.1088 51.0903 25.1088C53.2702 25.1088 54.452 24.164 54.452 22.3793C54.452 20.6472 53.2439 19.5974 50.4074 18.5476C46.6255 17.1567 44.8395 15.6082 44.8395 12.8263C44.8395 10.0969 47.0982 7.94482 50.6963 7.94482C53.5328 7.94482 55.5814 8.96836 56.9208 11.2254L54.5571 12.6951C53.6641 11.2516 52.4297 10.6218 50.7751 10.6218C49.0417 10.6218 47.7811 11.4354 47.7811 12.9051C47.7811 14.4272 49.3569 15.3196 51.8782 16.2644C55.6864 17.7078 57.4986 19.7286 57.4986 22.4843C57.4986 25.345 55.1874 27.8645 51.0903 27.8645Z"
+            fill="#0B1215"
+          />
+        </svg>
+      </div>
+
+      <nav className="sidebar-nav validator-sidebar__nav">
+        <div className={`dash-item-wrap${isQueue ? ' is-active' : ''}`}>
+          <a className={`dash-item${isQueue ? ' is-active' : ''}`} href="/queue/validator">
+            <span className="dash-icon">
+              <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M24.1475 16.875H19.2913C18.6513 16.8776 18.0384 17.1331 17.5861 17.5857C17.1337 18.0383 16.8786 18.6513 16.8763 19.2913V24.1475C16.8759 24.4647 16.9382 24.7789 17.0594 25.0721C17.1807 25.3652 17.3585 25.6316 17.5829 25.8559C17.8072 26.0802 18.0735 26.2581 18.3667 26.3793C18.6598 26.5006 18.974 26.5628 19.2913 26.5625H24.1475C24.7879 26.5622 25.402 26.3076 25.8548 25.8548C26.3076 25.402 26.5622 24.7879 26.5625 24.1475V19.2913C26.5628 18.974 26.5006 18.6598 26.3793 18.3667C26.2581 18.0735 26.0802 17.8072 25.8559 17.5829C25.6316 17.3585 25.3652 17.1807 25.0721 17.0594C24.7789 16.9382 24.4647 16.8759 24.1475 16.8763M24.1475 3.4375H5.8525C5.53527 3.43717 5.22108 3.49941 4.92793 3.62066C4.63478 3.74191 4.36843 3.91979 4.14411 4.1441C3.91979 4.36842 3.74191 4.63478 3.62066 4.92793C3.49942 5.22108 3.43717 5.53527 3.4375 5.8525V10.7088C3.43701 11.0261 3.49913 11.3404 3.6203 11.6337C3.74148 11.927 3.91933 12.1935 4.14366 12.418C4.368 12.6424 4.63441 12.8204 4.92764 12.9417C5.22088 13.063 5.53516 13.1253 5.8525 13.125H24.1475C24.4647 13.1253 24.7789 13.0631 25.0721 12.9418C25.3652 12.8206 25.6316 12.6427 25.8559 12.4184C26.0802 12.1941 26.2581 11.9277 26.3793 11.6346C26.5006 11.3414 26.5628 11.0272 26.5625 10.71V5.8525C26.5628 5.53527 26.5006 5.22108 26.3793 4.92793C26.2581 4.63478 26.0802 4.36842 25.8559 4.1441C25.6316 3.91979 25.3652 3.74191 25.0721 3.62066C24.7789 3.49941 24.4647 3.43717 24.1475 3.4375ZM10.7088 16.875H5.8525C5.53516 16.8747 5.22088 16.937 4.92764 17.0583C4.63441 17.1796 4.368 17.3576 4.14366 17.582C3.91933 17.8065 3.74148 18.073 3.6203 18.3663C3.49913 18.6596 3.43701 18.9739 3.4375 19.2913V24.1475C3.43717 24.4647 3.49942 24.7789 3.62066 25.0721C3.74191 25.3652 3.91979 25.6316 4.14411 25.8559C4.36843 26.0802 4.63478 26.2581 4.92793 26.3793C5.22108 26.5006 5.53527 26.5628 5.8525 26.5625H10.7088C11.026 26.5628 11.3402 26.5006 11.6333 26.3793C11.9265 26.2581 12.1928 26.0802 12.4171 25.8559C12.6415 25.6316 12.8193 25.3652 12.9406 25.0721C13.0618 24.7789 13.1241 24.4647 13.1238 24.1475V19.2913C13.1214 18.6513 12.8663 18.0383 12.4139 17.5857C11.9616 17.1331 11.3487 16.8776 10.7088 16.875Z"
+                  stroke="#5260FF"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+            <span>Очередь</span>
+          </a>
+        </div>
+
+        <a className={`dash-item dash-item--profile${isProfile ? ' is-active' : ''}`} href="/queue/validator/profile">
+          <span className="dash-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M0.75 18.25C0.75 16.9239 1.27678 15.6521 2.21447 14.7145C3.15215 13.7768 4.42392 13.25 5.75 13.25H15.75C17.0761 13.25 18.3479 13.7768 19.2855 14.7145C20.2232 15.6521 20.75 16.9239 20.75 18.25C20.75 18.913 20.4866 19.5489 20.0178 20.0178C19.5489 20.4866 18.913 20.75 18.25 20.75H3.25C2.58696 20.75 1.95107 20.4866 1.48223 20.0178C1.01339 19.5489 0.75 18.913 0.75 18.25Z"
+                stroke="#696E82"
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M10.75 8.25C12.8211 8.25 14.5 6.57107 14.5 4.5C14.5 2.42893 12.8211 0.75 10.75 0.75C8.67893 0.75 7 2.42893 7 4.5C7 6.57107 8.67893 8.25 10.75 8.25Z"
+                stroke="#696E82"
+                strokeWidth="1.5"
+              />
+            </svg>
+          </span>
+          <span>Мой профиль</span>
+        </a>
+      </nav>
+
+      <button className="dash-item logout" type="button">
+        <span className="dash-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M15 4.00098H5V18.001C5 18.5314 5.21071 19.0401 5.58579 19.4152C5.96086 19.7903 6.46957 20.001 7 20.001H15M16 15.001L19 12.001M19 12.001L16 9.00098M19 12.001H9"
+              stroke="#696E82"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+        <span>Выход</span>
+      </button>
+    </aside>
+  )
+}
+
+export default function ValidatorProfilePage() {
+  const { bellOpen, setBellOpen } = useDashboardDropdowns()
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+
+  const { tabs, activeTab, setActiveTab } = useProfileTabs()
+  const validatorTabs = useMemo(
+    () => tabs.filter((tab) => tab.id !== 'about'),
+    [tabs]
+  )
+
+  useEffect(() => {
+    if (activeTab === 'about') {
+      setActiveTab('profile')
+    }
+  }, [activeTab, setActiveTab])
+
+  const {
+    profileDirty,
+    setProfileDirty,
+    firstName,
+    setFirstName,
+    lastName,
+    setLastName,
+    middleName,
+    setMiddleName,
+    avatarUrl,
+    setAvatarUrl,
+    aboutExperience,
+    setAboutExperience,
+    aboutBio,
+    setAboutBio,
+    aboutStack,
+    setAboutStack,
+    aboutStackItems,
+    addStackItems,
+    contactPhone,
+    setContactPhone,
+    contactEmail,
+    setContactEmail,
+    contactTelegram,
+    setContactTelegram,
+    contactGithub,
+    setContactGithub,
+  } = useProfileDraft()
+
+  const { handleAvatarChange } = useAvatarUpload({ setAvatarUrl, setProfileDirty })
+
+  return (
+    <div className="dashboard validator-profile-page">
+      <ValidatorSidebar />
+
+      <main className="dashboard-content">
+        <CustomerHeaderBar
+          title="Мой профиль"
+          hasNotifications
+          bellOpen={bellOpen}
+          onBellToggle={() => setBellOpen((prev) => !prev)}
+          onBellClose={() => setBellOpen(false)}
+        />
+
+        <div className="dashboard-surface">
+          <section className="profile-page">
+            <div className="profile-page__content">
+              <ProfileTabs tabs={validatorTabs} activeTab={activeTab} onChange={setActiveTab} />
+
+              <ProfilePanel
+                activeTab={activeTab}
+                avatarUrl={avatarUrl}
+                onAvatarChange={handleAvatarChange}
+                onRemoveAvatar={() => {
+                  setAvatarUrl(null)
+                  setProfileDirty(true)
+                }}
+                profileDirty={profileDirty}
+                onSaveProfile={() => setProfileDirty(false)}
+                firstName={firstName}
+                lastName={lastName}
+                middleName={middleName}
+                onFirstNameChange={(value) => {
+                  setFirstName(value)
+                  setProfileDirty(true)
+                }}
+                onLastNameChange={(value) => {
+                  setLastName(value)
+                  setProfileDirty(true)
+                }}
+                onMiddleNameChange={(value) => {
+                  setMiddleName(value)
+                  setProfileDirty(true)
+                }}
+                aboutExperience={aboutExperience}
+                aboutBio={aboutBio}
+                aboutStack={aboutStack}
+                aboutStackItems={aboutStackItems}
+                onExperienceChange={(value: string) => {
+                  setAboutExperience(value)
+                  setProfileDirty(true)
+                }}
+                onBioChange={(value: string) => {
+                  setAboutBio(value)
+                  setProfileDirty(true)
+                }}
+                onStackChange={(value: string) => {
+                  setAboutStack(value)
+                  setProfileDirty(true)
+                }}
+                onAddStack={() => {
+                  addStackItems(aboutStack)
+                  setAboutStack('')
+                  setProfileDirty(true)
+                }}
+                contactPhone={contactPhone}
+                contactEmail={contactEmail}
+                contactTelegram={contactTelegram}
+                contactGithub={contactGithub}
+                onContactPhoneChange={(value) => {
+                  setContactPhone(value)
+                  setProfileDirty(true)
+                }}
+                onContactEmailChange={(value) => {
+                  setContactEmail(value)
+                  setProfileDirty(true)
+                }}
+                onContactTelegramChange={(value) => {
+                  setContactTelegram(value)
+                  setProfileDirty(true)
+                }}
+                onContactGithubChange={(value) => {
+                  setContactGithub(value)
+                  setProfileDirty(true)
+                }}
+                twoFactorEnabled={twoFactorEnabled}
+                onToggleTwoFactor={() => setTwoFactorEnabled((prev) => !prev)}
+                onOpenPasswordModal={() => setPasswordModalOpen(true)}
+                onOpenDeleteModal={() => setDeleteModalOpen(true)}
+              />
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <EditFieldModal
+        isOpen={passwordModalOpen}
+        currentPassword={currentPassword}
+        newPassword={newPassword}
+        confirmPassword={confirmPassword}
+        onChangeCurrent={setCurrentPassword}
+        onChangeNew={setNewPassword}
+        onChangeConfirm={setConfirmPassword}
+        onClose={() => setPasswordModalOpen(false)}
+        onSave={() => setPasswordModalOpen(false)}
+      />
+
+      <ConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={() => setDeleteModalOpen(false)}
+      />
+    </div>
+  )
+}

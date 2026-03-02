@@ -1,0 +1,9 @@
+/* Used by: src/pages/specialist-portfolio/styles/index.css */
+.portfolio-section-title {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 25px;
+  line-height: 34px;
+  color: #0b1215;
+}

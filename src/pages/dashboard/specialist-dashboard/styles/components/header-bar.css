@@ -1,0 +1,66 @@
+/* Used by: src/pages/dashboard/specialist-dashboard/components/HeaderBar.tsx */
+.dashboard-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #0b1215;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dashboard-title__crumb {
+  font-size: 16px;
+  font-weight: 500;
+  color: #696e82;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.dashboard-title__sep {
+  font-size: 16px;
+  color: #a8b1ce;
+}
+
+.dashboard-title__page {
+  font-size: 20px;
+  font-weight: 600;
+  color: #0b1215;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.dashboard-bell {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 1px solid #e8e9ee;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0;
+  cursor: pointer;
+  margin-top: -4px;
+}
+
+.dashboard-bell__badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #f67476;
+  opacity: 0;
+}
+
+.dashboard-bell.is-active .dashboard-bell__badge {
+  opacity: 1;
+}

@@ -1,0 +1,173 @@
+/* Used by: src/pages/specialist-portfolio/components/ReviewsSection.tsx (via src/pages/specialist-portfolio/styles/index.css) */
+.portfolio-reviews-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.portfolio-reviews {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #0b1215;
+}
+
+.portfolio-reviews__count {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fd;
+  border-radius: 20px;
+  color: #5260ff;
+  font-weight: 500;
+}
+
+.review-card__head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #0b1215;
+  font-weight: 500;
+}
+
+.review-count {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #5260ff;
+  border-radius: 14px;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.review-card__body {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.review-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  gap: 20px;
+  width: 720px;
+  height: 236px;
+  background: #f8f9fd;
+  border-radius: 14px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.review-text {
+  color: #0b1215;
+  margin: 0;
+}
+
+.review-card__footer {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+}
+
+.review-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 16px;
+  gap: 10px;
+  height: 40px;
+  border-radius: 14px;
+  box-sizing: border-box;
+}
+
+.review-pill--role {
+  border: 1px solid #5260ff;
+  color: #0b1215;
+  width: 192px;
+  white-space: nowrap;
+}
+
+.review-pill--date {
+  background: #f8f9fd;
+  color: #696e82;
+  width: 113px;
+  margin-left: auto;
+}
+
+/* ADAPTIVE: карточка проекта/отзыва с Tech Lead и ролью */
+@media (max-width: 900px) {
+  .portfolio-review-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .review-frame {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+  }
+
+  .review-card__footer {
+    flex-wrap: wrap;
+  }
+
+  .review-pill--role {
+    width: auto;
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .review-pill--date {
+    width: auto;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .review-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .review-pill {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+.review-frame {
+  width: 100% !important;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  height: auto;
+}
+
+.review-text {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+h2.portfolio-section-title,
+h3.portfolio-section-title,
+.portfolio-reviews .portfolio-section-title {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 25px;
+  line-height: 34px;
+  color: #0b1215;
+}

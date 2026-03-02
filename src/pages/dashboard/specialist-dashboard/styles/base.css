@@ -1,0 +1,8 @@
+/* Used by: src/pages/dashboard/specialist-dashboard/SpecialistDashboardPage.tsx */
+.dashboard {
+  min-height: 100vh;
+  display: block;
+  background: #ffffff;
+  color: #0b1215;
+  font-family: 'Manrope', system-ui, sans-serif;
+}

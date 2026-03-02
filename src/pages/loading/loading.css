@@ -1,0 +1,62 @@
+/* Used by: src/pages/loading/Loading.tsx */
+@import '../auth/login.css';
+
+.loading-center {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+.loading-logo__hi .loading-logo__seg {
+  opacity: 0;
+  animation: loadingPulse 2.4s ease-in-out infinite;
+}
+
+.loading-logo__hi .seg-4 {
+  animation-delay: 0s;
+}
+
+.loading-logo__hi .seg-3 {
+  animation-delay: 0.4s;
+}
+
+.loading-logo__hi .seg-2 {
+  animation-delay: 0.8s;
+}
+
+.loading-logo__hi .seg-1 {
+  animation-delay: 1.2s;
+}
+
+@keyframes loadingPulse {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-logo__hi .loading-logo__seg {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+.loading-footer {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #0b1215;
+  font-size: 31px;
+  line-height: 42px;
+  font-weight: 600;
+}

@@ -1,0 +1,58 @@
+/* Used by: src/pages/dashboard/specialist-project/components/ProjectDetails.tsx */
+.project-details {
+  margin-top: 30px;
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.project-requirements {
+  flex: 1 1 600px;
+  border: 1px solid #e8e9ee;
+  border-radius: 20px;
+  padding: 20px 20px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  box-sizing: border-box;
+  min-width: 320px;
+}
+
+.project-requirements__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.project-requirements__head h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #0b1215;
+}
+
+.project-requirements__pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 16px;
+  height: 40px;
+  border: 1px solid #5260ff;
+  border-radius: 15px;
+  color: #5260ff;
+  font-size: 13px;
+}
+
+.project-requirements__block h4 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: #0b1215;
+}
+
+.project-requirements__block p {
+  margin: 0;
+  font-size: 16px;
+  color: #0b1215;
+  line-height: 1.6;
+}

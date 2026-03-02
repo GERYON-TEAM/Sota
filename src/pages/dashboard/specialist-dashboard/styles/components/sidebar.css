@@ -1,0 +1,142 @@
+/* Used by: src/pages/dashboard/specialist-dashboard/components/Sidebar.tsx */
+.sidebar {
+  background: #f0f2f7;
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  box-shadow: 8px 0 24px rgba(15, 23, 42, 0.04);
+  position: relative;
+  z-index: 10;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 300px;
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 10px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dash-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10px 20px;
+  gap: 15px;
+  width: 260px;
+  height: 54px;
+  background: transparent;
+  border-radius: 15px;
+  border: 1px solid transparent;
+  color: #696e82;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+.dash-item-wrap {
+  display: inline-flex;
+  border-radius: 15px;
+  padding: 6px;
+  background: transparent;
+}
+
+.dash-item-wrap.is-active {
+  background: #ffffff;
+}
+
+.dash-item-wrap.is-active .dash-item {
+  color: #0b1215;
+}
+
+.dash-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 24px;
+}
+
+.dash-item span:last-child {
+  flex: 1 1 auto;
+  text-align: left;
+  line-height: 1;
+}
+
+.dash-item:hover {
+  color: #0b1215;
+}
+
+.dash-item svg path {
+  stroke: #696e82;
+}
+
+.dash-item:hover svg path {
+  stroke: #5260ff;
+}
+
+.dash-item.logout:hover svg path {
+  stroke: #5260ff;
+  fill: none;
+}
+
+.dash-item.is-active {
+  border-color: transparent;
+  color: #0b1215;
+  background: #ffffff;
+}
+
+.dash-item.is-active svg path {
+  stroke: #5260ff;
+}
+
+.dash-item--portfolio.is-active {
+  background: #ffffff;
+  color: #0b1215;
+}
+
+.dash-item--portfolio,
+.dash-item--profile,
+.dash-item.logout {
+  background: transparent;
+}
+
+.dash-item.logout {
+  margin-top: auto;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    overflow-x: auto;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+  }
+
+  .dash-item {
+    width: auto;
+  }
+}

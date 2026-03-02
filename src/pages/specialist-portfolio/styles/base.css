@@ -1,0 +1,101 @@
+/* Used by: src/pages/specialist-portfolio/styles/index.css */
+.portfolio-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-sizing: border-box;
+  height: 160px;
+}
+
+.portfolio-card h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22px;
+  color: #696e82;
+}
+
+.portfolio-card p {
+  margin: 0;
+  color: #0b1215;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.portfolio-card {
+  flex: 1 1 403px;
+  min-width: 280px;
+}
+
+.contact-icon {
+  display: inline-flex;
+  width: 54px;
+  height: 54px;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.portfolio-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.portfolio-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border: 1px solid #e8e9ee;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22px;
+  color: #0b1215;
+}
+
+.portfolio-count {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  gap: 10px;
+  width: 40px;
+  height: 40px;
+  background: #f8f9fd;
+  border-radius: 15px;
+  box-sizing: border-box;
+}
+
+.portfolio-count span {
+  color: #5260ff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.portfolio-review-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 20px;
+  gap: 20px;
+  width: 760px;
+  border: 1px solid #e8e9ee;
+  border-radius: 20px;
+  margin-top: 20px;
+  box-sizing: border-box;
+}
+
+/* REVIEW/PROJECT CARD: убираем фикс-ширины, иначе при ~1150px ломает */
+.portfolio-review-card {
+  width: 100% !important;
+  max-width: 760px;
+  min-width: 0;
+  box-sizing: border-box;
+}

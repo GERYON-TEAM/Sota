@@ -1,0 +1,163 @@
+/* Used by: src/pages/specialist-portfolio/components/ProfileCard.tsx (via src/pages/specialist-portfolio/styles/index.css) */
+.portfolio-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 30px;
+  gap: 30px;
+  width: 100%;
+  background: #f8f9fd;
+  border-radius: 20px;
+  box-sizing: border-box;
+}
+
+.portfolio-stats__top {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.portfolio-user {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.portfolio-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: #e8e9ee;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.portfolio-user__text {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.portfolio-user__name {
+  font-size: 22px;
+  font-weight: 600;
+  color: #0b1215;
+}
+
+.portfolio-user__level {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 10px;
+  gap: 10px;
+  width: 71px;
+  height: 40px;
+  background: #5260ff;
+  color: #ffffff;
+  border-radius: 14px;
+  font-size: 14px;
+}
+
+.portfolio-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.portfolio-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 56px;
+  padding: 16px 20px;
+  background: #ffffff;
+  border-radius: 20px;
+  border: none;
+  color: #0b1215;
+  cursor: pointer;
+}
+
+.portfolio-action span {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.portfolio-stats__bottom {
+  width: 100%;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.portfolio-rating {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  width: 200px;
+  height: 160px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-sizing: border-box;
+}
+
+.portfolio-rating span {
+  color: #5260FF;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22px;
+}
+
+.portfolio-rating .stat-card__head span {
+  color: #696e82;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22px;
+}
+
+.portfolio-card--about p {
+  line-height: 1.4;
+  max-height: calc(1.4em * 4);
+  white-space: normal;
+  word-break: break-word;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+}
+
+.portfolio-card--contacts {
+  flex: 0 0 220px;
+}
+
+.portfolio-contacts {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.portfolio-card--stack .portfolio-tags {
+  max-height: 74px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+}
+
+.portfolio-contacts {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+@media (max-width: 1100px) {
+  .portfolio-stats__top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

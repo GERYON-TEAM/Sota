@@ -1,0 +1,190 @@
+/* Used by: src/pages/auth/Register.tsx, src/pages/auth/forgot/ResetPassword.tsx */
+.register-footer {
+  display: inline-flex;
+  gap: 6px;
+  font-size: 14px;
+  color: #696e82;
+}
+
+.register-footer--inline {
+  position: static;
+}
+
+.register-link {
+  color: #5260ff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.register-form {
+  gap: 13px;
+}
+
+.register-form .login-submit {
+  margin-top: 5px;
+}
+
+.register-title {
+  margin: 0;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: clamp(24px, 3.2vw, 31px);
+  line-height: 42px;
+  text-align: center;
+  color: #0b1215;
+}
+
+
+.register-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.register-input-row {
+  display: inline-flex;
+  align-items: center;
+}
+
+.register-input-row .login-input {
+  flex: 0 0 auto;
+  width: min(420px, 90vw);
+}
+
+.register-select {
+  position: relative;
+  width: min(420px, 90vw);
+}
+
+.register-select-trigger {
+  width: 100%;
+  height: 54px;
+  padding: 10px 16px 10px 20px;
+  border: 1px solid #a8b1ce;
+  border-radius: 20px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 16px;
+  color: #696e82;
+  cursor: pointer;
+}
+
+.register-select-trigger.has-value {
+  color: #0b1215;
+}
+
+.register-select-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.register-select[aria-expanded='true'] .register-select-icon {
+  transform: rotate(180deg);
+}
+
+.register-select-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  height: 144px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  background: #ffffff;
+  border: 1px solid #a8b1ce;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+  z-index: 3;
+}
+
+.register-select-item {
+  width: 100%;
+  height: 44px;
+  padding: 7px 12px 10px 16px;
+  border: none;
+  border-radius: 20px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 16px;
+  color: #0b1215;
+  cursor: pointer;
+}
+
+.register-select-item:hover {
+  background: #f8f9fd;
+}
+
+.register-select-label {
+  flex: 1 1 auto;
+  text-align: left;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.register-select-check {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  opacity: 0;
+}
+
+.register-select-check.is-visible {
+  opacity: 1;
+}
+
+.register-info {
+  position: relative;
+  margin-left: 10px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.register-tooltip {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 171px;
+  height: 186px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 16px;
+  gap: 11px;
+  border: 1px solid #a8b1ce;
+  border-radius: 20px;
+  color: #696e82;
+  font-size: 14px;
+  background: #ffffff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.register-info:hover .register-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.register-tooltip p {
+  margin: 0;
+}

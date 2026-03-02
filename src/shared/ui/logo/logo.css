@@ -1,0 +1,9 @@
+/* Used by: src/shared/ui/logo/Logo.tsx */
+.logo {
+  position: absolute;
+  left: 50%;
+  top: 6%;
+  width: clamp(72px, 10vw, 140px);
+  height: auto;
+  transform: translateX(-50%);
+}

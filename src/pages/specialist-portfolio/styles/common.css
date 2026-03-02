@@ -1,0 +1,10 @@
+/* Used by: src/pages/specialist-portfolio/styles/index.css */
+.progress-steps--compact {
+  gap: 2px;
+}
+
+.progress-steps--compact .progress-step {
+  width: 8px;
+  height: 20px;
+  border-radius: 10px;
+}

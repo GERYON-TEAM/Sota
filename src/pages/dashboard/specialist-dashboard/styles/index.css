@@ -1,0 +1,10 @@
+/* Used by: src/pages/dashboard/specialist-dashboard/SpecialistDashboardPage.tsx, src/pages/specialist-portfolio/SpecialistPortfolioPage.tsx */
+@import './base.css';
+@import './layout.css';
+@import './components/sidebar.css';
+@import './components/header-bar.css';
+@import './components/bell-panel.css';
+@import './components/stats.css';
+@import './components/active-projects.css';
+@import './components/projects.css';
+@import './components/invites.css';

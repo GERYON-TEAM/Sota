@@ -1,0 +1,189 @@
+/* Used by: src/pages/dashboard/specialist-dashboard/components/InvitesSection.tsx, src/pages/dashboard/specialist-dashboard/components/InviteCard.tsx */
+.project-invites {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.project-invites__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.project-invites h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #0b1215;
+}
+
+.invite-card {
+  width: 100%;
+  min-height: 346px;
+  min-width: 0;
+  background: #f8f9fd;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+.invite-card__top {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.invite-score {
+  width: 63px;
+  height: 40px;
+  background: #5260ff;
+  border-radius: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.invite-title {
+  flex: 1;
+  font-size: 16px;
+  color: #0b1215;
+}
+
+.invite-action {
+  width: 40px;
+  height: 40px;
+  background: #ffffff;
+  border-radius: 15px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+}
+
+.invite-main {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.invite-content {
+  width: 100%;
+  min-height: 172px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+.invite-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0b1215;
+}
+
+.invite-name span:first-child {
+  min-width: 0;
+  word-break: break-word;
+}
+
+.invite-rate {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0b1215;
+}
+
+.invite-rate span {
+  color: #696e82;
+  font-weight: 400;
+}
+
+.invite-sub {
+  font-size: 14px;
+  color: #696e82;
+}
+
+.invite-lead {
+  width: 100%;
+  min-height: 70px;
+  border: 1px solid #e8e9ee;
+  border-radius: 14px;
+  padding: 16px 10px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+}
+
+.invite-actions {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.invite-action-box {
+  margin-right: auto;
+}
+
+
+.invite-btn {
+  width: 146px;
+  height: 54px;
+  background: #ffffff;
+  border-radius: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.invite-btn--muted {
+  color: #696e82;
+}
+
+.invite-btn--primary {
+  color: #0b1215;
+}
+
+.invites-list {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .invites-list {
+    grid-template-columns: 1fr;
+  }
+}
