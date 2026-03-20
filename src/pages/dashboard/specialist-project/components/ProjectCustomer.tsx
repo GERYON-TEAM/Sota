@@ -1,12 +1,40 @@
-import RatingDots from '../../../../shared/ui/color-dots/RatingDots'
-import type { ProjectCustomerStat } from '../types/project.types'
+import type { ProjectActionState, ProjectCustomerStat } from '../types/project.types'
 import CustomerLinks from './CustomerLinks'
 
-export default function ProjectCustomer() {
+type ProjectCustomerProps = {
+  actionState: ProjectActionState
+}
+
+export default function ProjectCustomer({ actionState }: ProjectCustomerProps) {
   const stats: ProjectCustomerStat[] = [
     { label: 'Должность', value: 'Заказчик' },
-    { label: 'Опыт', value: '5 лет' },
   ]
+  const actionConfig: Record<
+    ProjectActionState,
+    { label: string; className: string; disabled: boolean }
+  > = {
+    available: {
+      label: 'Откликнуться',
+      className: 'project-customer__cta--primary',
+      disabled: false,
+    },
+    applied: {
+      label: 'Вы уже откликнулись',
+      className: 'project-customer__cta--applied',
+      disabled: true,
+    },
+    invited: {
+      label: 'Вы получили приглашение',
+      className: 'project-customer__cta--invited',
+      disabled: true,
+    },
+    in_team: {
+      label: 'Вы в команде',
+      className: 'project-customer__cta--in-team',
+      disabled: true,
+    },
+  }
+  const currentAction = actionConfig[actionState]
 
   return (
     <aside className="project-customer">
@@ -18,7 +46,6 @@ export default function ProjectCustomer() {
             <span className="project-customer__name">Нестеров</span>
             <span className="project-customer__name">Ярослав</span>
           </div>
-          <RatingDots className="project-customer__rating" />
         </div>
 
         <div className="project-customer__stats">
@@ -38,8 +65,12 @@ export default function ProjectCustomer() {
 
       <CustomerLinks />
 
-      <button className="project-customer__cta" type="button">
-        Откликнуться
+      <button
+        className={`project-customer__cta ${currentAction.className}`}
+        type="button"
+        disabled={currentAction.disabled}
+      >
+        {currentAction.label}
       </button>
     </aside>
   )

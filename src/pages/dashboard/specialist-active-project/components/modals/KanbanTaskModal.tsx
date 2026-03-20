@@ -2,7 +2,7 @@ import type { RefObject } from 'react'
 import type { ModalTab } from '../../types/active-project.types'
 import TaskDescriptionPanel from '../panels/TaskDescriptionPanel'
 import ProjectChat from '../panels/ProjectChat'
-import type { ChatMessage } from '../../types/active-project.types'
+import type { ChatAttachment, ChatMessage } from '../../types/active-project.types'
 
 type KanbanTaskModalProps = {
   activeTab: ModalTab
@@ -33,7 +33,7 @@ type KanbanTaskModalProps = {
   chatInput: string
   messages: ChatMessage[]
   onChatInputChange: (value: string) => void
-  onChatSend: () => void
+  onChatSend: (payload?: { text?: string; attachments?: ChatAttachment[] }) => void
   onClose: () => void
 }
 
@@ -435,55 +435,57 @@ export default function KanbanTaskModal({
 
             <div className="kanban-modal__section">
               <div className="kanban-select-label">Сложность Story Points</div>
-              <div className="kanban-select kanban-select--stepper">
-                <input
-                  className="kanban-select__input"
-                  inputMode="numeric"
-                  value={storyPoints}
-                  onChange={(event) => {
-                    const digits = event.target.value.replace(/[^\d]/g, '')
-                    if (digits === '') {
-                      onStoryPointsChange(0)
-                      return
-                    }
-                    const n = Math.max(0, Math.min(13, Number(digits)))
-                    onStoryPointsChange(n)
-                  }}
-                />
-                <span className="kanban-stepper" aria-hidden="true">
-                  <button
-                    className="kanban-stepper__btn"
-                    type="button"
-                    onClick={() => onStoryPointsChange(Math.min(13, storyPoints + 1))}
-                    aria-label="Увеличить"
-                  >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
+              <div className="kanban-story-points-scroll">
+                <div className="kanban-select kanban-select--stepper">
+                  <input
+                    className="kanban-select__input"
+                    inputMode="numeric"
+                    value={storyPoints}
+                    onChange={(event) => {
+                      const digits = event.target.value.replace(/[^\d]/g, '')
+                      if (digits === '') {
+                        onStoryPointsChange(0)
+                        return
+                      }
+                      const n = Math.max(0, Math.min(13, Number(digits)))
+                      onStoryPointsChange(n)
+                    }}
+                  />
+                  <span className="kanban-stepper" aria-hidden="true">
+                    <button
+                      className="kanban-stepper__btn"
+                      type="button"
+                      onClick={() => onStoryPointsChange(Math.min(13, storyPoints + 1))}
+                      aria-label="Увеличить"
                     >
-                      <path d="M7 14L12 9L17 14" stroke="#696E82" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
-                  <button
-                    className="kanban-stepper__btn"
-                    type="button"
-                    onClick={() => onStoryPointsChange(Math.max(0, storyPoints - 1))}
-                    aria-label="Уменьшить"
-                  >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M7 14L12 9L17 14" stroke="#696E82" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                    <button
+                      className="kanban-stepper__btn"
+                      type="button"
+                      onClick={() => onStoryPointsChange(Math.max(0, storyPoints - 1))}
+                      aria-label="Уменьшить"
                     >
-                      <path d="M7 10L12 15L17 10" stroke="#696E82" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
-                </span>
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M7 10L12 15L17 10" stroke="#696E82" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  </span>
+                </div>
               </div>
             </div>
           </>

@@ -1,11 +1,16 @@
+import type { ProjectActionState } from '../types/project.types'
 import ProjectRequirements from './ProjectRequirements'
 import ProjectCustomer from './ProjectCustomer'
 
-export default function ProjectDetails() {
+type ProjectDetailsProps = {
+  actionState: ProjectActionState
+}
+
+export default function ProjectDetails({ actionState }: ProjectDetailsProps) {
   return (
     <section className="project-details">
       <ProjectRequirements />
-      <ProjectCustomer />
+      <ProjectCustomer actionState={actionState} />
     </section>
   )
 }

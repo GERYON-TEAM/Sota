@@ -9,6 +9,7 @@ import SpecialistPortfolio from './pages/dashboard/SpecialistPortfolio.tsx'
 import SpecialistOpenProjects from './pages/dashboard/SpecialistOpenProjects.tsx'
 import SpecialistProject from './pages/dashboard/SpecialistProject.tsx'
 import SpecialistActiveProject from './pages/dashboard/SpecialistActiveProject.tsx'
+import SpecialistProjectChat from './pages/dashboard/SpecialistProjectChat.tsx'
 import SpecialistProfile from './pages/dashboard/SpecialistProfile.tsx'
 import SpecialistInviteProject from './pages/dashboard/SpecialistInviteProject.tsx'
 import SpecialistPortfolioProject from './pages/dashboard/SpecialistPortfolioProject.tsx'
@@ -52,6 +53,9 @@ function App() {
   }
   if (path === '/dashboard/specialist/project') {
     return <SpecialistActiveProject />
+  }
+  if (path === '/dashboard/specialist/project/chat') {
+    return <SpecialistProjectChat />
   }
   if (path === '/dashboard/specialist/profile') {
     return <SpecialistProfile />

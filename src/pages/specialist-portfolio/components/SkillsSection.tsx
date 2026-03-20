@@ -133,9 +133,9 @@ export default function SkillsSection({
                       <span className="skill-projects__count">10</span>
                     </div>
 
-                    <div className="skill-level">Middle</div>
+                    <div className="skill-level">{skill.level}</div>
 
-                    <ProgressSteps className="progress-steps--compact" done={skill.progress} />
+                    <ProgressSteps className="progress-steps--compact" total={5} done={skill.progress} />
                     <span className="skill-spacer" aria-hidden="true" />
                     <span className="dot-menu-wrap">
                       <button
@@ -255,9 +255,9 @@ export default function SkillsSection({
                       <span className="skill-projects__count">10</span>
                     </div>
 
-                    <div className="skill-level">Middle</div>
+                    <div className="skill-level">{skill.level}</div>
 
-                    <ProgressSteps className="progress-steps--compact" done={skill.progress} />
+                    <ProgressSteps className="progress-steps--compact" total={5} done={skill.progress} />
                     <span className="skill-spacer" aria-hidden="true" />
                     <span className="dot-menu-wrap">
                       <button

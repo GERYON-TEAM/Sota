@@ -269,7 +269,8 @@
 }
 
 .skill-row .progress-steps--compact .progress-step {
-  width: 8px !important;
+  width: 6px !important;
+  height: 22px !important;
 }
 
 .skill-menu {

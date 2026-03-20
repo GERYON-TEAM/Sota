@@ -110,7 +110,16 @@ export default function ActiveProjectPage() {
 
         <div className="dashboard-surface">
           <section className="project-workspace">
-            <WorkspaceCard title="Название проекта" onOpen={() => {}} />
+            <WorkspaceCard
+              title="Название проекта"
+              onOpen={() => {
+                setActiveTab('info')
+                setModalOpen(true)
+              }}
+              onChatOpen={() => {
+                window.location.href = '/dashboard/specialist/project/chat'
+              }}
+            />
 
             <WorkspaceToolbar
               workspaceTab={workspaceTab}

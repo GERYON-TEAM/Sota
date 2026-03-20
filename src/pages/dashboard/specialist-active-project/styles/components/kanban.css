@@ -259,6 +259,18 @@
   box-sizing: border-box;
 }
 
+.kanban-chat--page {
+  width: 100%;
+  height: 100%;
+  min-height: 813px;
+  justify-content: flex-end;
+  background: #ffffff;
+  border-radius: 15px;
+  padding: 20px;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
 .kanban-chat__messages {
   flex: 1;
   overflow-y: auto;
@@ -268,6 +280,29 @@
   flex-direction: column;
   gap: 12px;
   box-sizing: border-box;
+}
+
+.kanban-chat__message-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kanban-chat__date-chip {
+  display: inline-flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 10px;
+  gap: 10px;
+  width: 92px;
+  height: 32px;
+  background: #f8f9fd;
+  border-radius: 15px;
+  align-self: center;
+  box-sizing: border-box;
+  font-size: 14px;
+  color: #696e82;
 }
 
 .kanban-chat__message {
@@ -283,6 +318,57 @@
   align-items: flex-end;
 }
 
+.kanban-chat__incoming-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 301px;
+  max-width: 301px;
+  padding: 0 12px 0 60px;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.kanban-chat__incoming-name {
+  font-size: 14px;
+  color: #0b1215;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.kanban-chat__incoming-time {
+  font-size: 12px;
+  color: #696e82;
+  line-height: 1;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.kanban-chat__row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.kanban-chat__message.is-me .kanban-chat__row {
+  flex-direction: row-reverse;
+}
+
+.kanban-chat__avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #e8e9ee;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #0b1215;
+  font-size: 12px;
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+
 .kanban-chat__bubble {
   max-width: 70%;
   background: #f8f9fd;
@@ -294,17 +380,29 @@
   gap: 10px;
   color: #0b1215;
   word-break: break-word;
-}
-
-.kanban-chat__author {
-  font-size: 12px;
-  color: #696e82;
+  position: relative;
 }
 
 .kanban-chat__text {
   margin: 0;
   font-size: 14px;
   line-height: 1.4;
+}
+
+.kanban-chat__outgoing-time {
+  font-size: 12px;
+  color: #696e82;
+  line-height: 1;
+  align-self: flex-end;
+  padding-right: 12px;
+}
+
+.kanban-chat__bubble-time {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 12px;
+  color: #696e82;
 }
 
 .kanban-chat__time {
@@ -320,8 +418,8 @@
   color: #ffffff;
 }
 
-.kanban-chat__message.is-me .kanban-chat__author {
-  color: rgba(255, 255, 255, 0.7);
+.kanban-chat__message.is-me .kanban-chat__bubble-time {
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .kanban-chat__composer {
@@ -340,19 +438,20 @@
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  padding: 20px;
-  gap: 20px;
+  padding: 14px;
+  gap: 12px;
   width: 588px;
-  height: 60px;
+  min-height: 60px;
   background: #ffffff;
   border: 1px solid #e8e9ee;
   border-radius: 20px;
   flex: 1 1 auto;
+  position: relative;
 }
 
 .kanban-chat__input {
   width: 100%;
-  height: 100%;
+  min-height: 24px;
   border: none;
   padding: 0;
   font-size: 16px;
@@ -363,6 +462,208 @@
 
 .kanban-chat__input::placeholder {
   color: #a0a6ba;
+}
+
+.kanban-chat.is-drag-active .kanban-chat__input-wrap {
+  border-color: #5260ff;
+  background: #f8f9fd;
+}
+
+.kanban-chat__input-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kanban-chat__attach-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.kanban-chat__attach {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.kanban-chat__attach-menu {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 6px;
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 12px);
+  width: 200px;
+  background: #ffffff;
+  border: 1px solid #e8e9ee;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+  border-radius: 20px;
+  z-index: 10;
+}
+
+.kanban-chat__attach-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  color: #0b1215;
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+.kanban-chat__attach-item:hover {
+  background: #f8f9fd;
+}
+
+.kanban-chat__file-input {
+  display: none;
+}
+
+.kanban-chat__mentions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kanban-chat__mention {
+  width: 100%;
+  border: none;
+  background: #f8f9fd;
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.kanban-chat__mention-name {
+  font-size: 14px;
+  color: #0b1215;
+}
+
+.kanban-chat__mention-username {
+  font-size: 14px;
+  color: #696e82;
+}
+
+.kanban-chat__pending,
+.kanban-chat__attachments {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.kanban-chat__attachment-card {
+  width: 110px;
+  height: 110px;
+  border-radius: 15px;
+  background: #ffffff;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.kanban-chat__attachment-card.is-image {
+  overflow: hidden;
+}
+
+.kanban-chat__attachment-preview {
+  width: 100%;
+  height: 46px;
+  border-radius: 10px;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-color: #f8f9fd;
+}
+
+.kanban-chat__attachment-preview--document {
+  background: #f8f9fd;
+  position: relative;
+}
+
+.kanban-chat__attachment-preview--document::after {
+  content: '';
+  position: absolute;
+  inset: 12px 16px;
+  border: 1.5px solid #0b1215;
+  border-radius: 6px;
+}
+
+.kanban-chat__attachment-name {
+  width: 100%;
+  font-size: 12px;
+  color: #0b1215;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kanban-chat__attachment-size {
+  font-size: 12px;
+  color: #696e82;
+  line-height: 1.35;
+}
+
+.kanban-chat__attachments.is-sent .kanban-chat__attachment-card {
+  width: 220px;
+  height: auto;
+  background: #f8f9fd;
+}
+
+.kanban-chat__attachments.is-sent .kanban-chat__attachment-card.is-image {
+  width: 240px;
+}
+
+.kanban-chat__attachments.is-sent .kanban-chat__attachment-preview {
+  height: 156px;
+}
+
+.kanban-chat__attachments.is-sent .kanban-chat__attachment-preview--document {
+  height: 56px;
+  background: #ffffff;
+}
+
+.kanban-chat__message:not(.is-me) .kanban-chat__bubble {
+  background: #f8f9fd;
+  box-sizing: border-box;
+  flex-direction: row;
+  align-items: center;
+  padding: 10px 16px;
+  gap: 10px;
+  width: auto;
+  max-width: 301px;
+  min-height: 40px;
+  height: auto;
+  border-radius: 15px;
+  padding-top: 10px;
+}
+
+.kanban-chat__message:not(.is-me) .kanban-chat__bubble-time {
+  display: none;
 }
 
 .kanban-chat__send {
@@ -626,6 +927,16 @@
 .kanban-select--stepper {
   gap: 12px;
   justify-content: flex-start;
+}
+
+.kanban-story-points-scroll {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.kanban-story-points-scroll .kanban-select--stepper {
+  min-width: 652px;
 }
 
 .kanban-stepper {

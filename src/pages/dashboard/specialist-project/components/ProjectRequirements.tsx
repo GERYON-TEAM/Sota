@@ -23,7 +23,6 @@ export default function ProjectRequirements() {
     <article className="project-requirements">
       <div className="project-requirements__head">
         <h3>Описание требований</h3>
-        <span className="project-requirements__pill">Удаленка</span>
       </div>
 
       {blocks.map((block) => {

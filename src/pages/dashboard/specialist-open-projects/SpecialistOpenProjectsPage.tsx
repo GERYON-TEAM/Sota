@@ -25,6 +25,7 @@ export default function SpecialistOpenProjectsPage() {
       {
         id: 'project-1',
         title: 'Платформа управления задачами',
+        projectType: 'Веб-приложение',
         matchPercent: 98,
         matchLabel: 'Соответствие требованиям',
         subtitle: 'Ищут Middle Backend на React',
@@ -36,6 +37,7 @@ export default function SpecialistOpenProjectsPage() {
       {
         id: 'project-2',
         title: 'Редизайн аналитического кабинета',
+        projectType: 'Дизайн',
         matchPercent: 60,
         matchLabel: 'Соответствие требованиям',
         subtitle: 'Ищут Senior Frontend на React',
@@ -47,6 +49,7 @@ export default function SpecialistOpenProjectsPage() {
       {
         id: 'project-3',
         title: 'Мобильное приложение для обучения',
+        projectType: 'Мобильное приложение',
         matchPercent: 30,
         matchLabel: 'Соответствие требованиям',
         subtitle: 'Ищут Product Designer',

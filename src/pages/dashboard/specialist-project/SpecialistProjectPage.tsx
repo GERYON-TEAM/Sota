@@ -7,9 +7,11 @@ import Sidebar from '../specialist-dashboard/components/Sidebar'
 import HeaderBar from '../specialist-dashboard/components/HeaderBar'
 import '../specialist-dashboard/styles/index.css'
 import './styles/index.css'
+import type { ProjectActionState } from './types/project.types'
 
 export default function SpecialistProjectPage() {
   const { bellOpen, setBellOpen, descOpen, setDescOpen, matchClass } = useProjectUi()
+  const actionState: ProjectActionState = 'available'
 
   return (
     <div className="dashboard">
@@ -30,7 +32,7 @@ export default function SpecialistProjectPage() {
             matchClass={matchClass.className}
             onOpenDescription={() => setDescOpen(true)}
           />
-          <ProjectDetails />
+          <ProjectDetails actionState={actionState} />
         </div>
       </main>
       <ProjectDescriptionModal isOpen={descOpen} onClose={() => setDescOpen(false)} />

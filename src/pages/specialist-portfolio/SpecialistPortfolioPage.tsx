@@ -11,7 +11,6 @@ import AddEditSkillModal from './modals/AddEditSkillModal'
 import AddEditGoalModal from './modals/AddEditGoalModal'
 import { normalizeEmail, normalizeGithub, normalizeTelegram } from './utils/contacts'
 import { formatDate, toIsoDate } from './utils/dates'
-import { clamp01to10 } from './utils/numbers'
 import { shortenGoalDescription } from './utils/text'
 import type { Goal, Skill } from './types/portfolio.types'
 import { useDatePicker } from './hooks/useDatePicker'
@@ -40,10 +39,10 @@ export default function SpecialistPortfolio() {
     null
   )
   const [hardSkills, setHardSkills] = useState<Skill[]>([
-    { name: 'React', progress: 6 },
+    { name: 'React', level: 'Middle', progress: 5 },
   ])
   const [softSkills, setSoftSkills] = useState<Skill[]>([
-    { name: 'Communication', progress: 4 },
+    { name: 'Communication', level: 'Middle', progress: 4 },
   ])
   const [hardSkillsPage, setHardSkillsPage] = useState(0)
   const [softSkillsPage, setSoftSkillsPage] = useState(0)
@@ -54,6 +53,7 @@ export default function SpecialistPortfolio() {
   const [skillType, setSkillType] = useState('')
   const [skillLevelOpen, setSkillLevelOpen] = useState(false)
   const [skillLevel, setSkillLevel] = useState('')
+  const [progressOpen, setProgressOpen] = useState(false)
   const [progress, setProgress] = useState<number>(0)
   const [githubUrl, setGithubUrl] = useState('')
   const [telegramUrl, setTelegramUrl] = useState('')
@@ -110,19 +110,6 @@ export default function SpecialistPortfolio() {
     setEditAvatarUrl(nextUrl)
   }
 
-  const incProgress = () => setProgress((value) => clamp01to10(value + 1))
-  const decProgress = () => setProgress((value) => clamp01to10(value - 1))
-
-  const onProgressChange = (value: string) => {
-    if (value === '') {
-      setProgress(0)
-      return
-    }
-    const digits = value.replace(/[^\d]/g, '')
-    const nextValue = clamp01to10(Number(digits))
-    setProgress(nextValue)
-  }
-
   const resetSkillModal = () => {
     setIsAddSkillOpen(false)
     setEditingSkill(null)
@@ -133,6 +120,7 @@ export default function SpecialistPortfolio() {
     setProgress(0)
     setSkillTypeOpen(false)
     setSkillLevelOpen(false)
+    setProgressOpen(false)
   }
 
   const handleShare = async () => {
@@ -165,7 +153,11 @@ export default function SpecialistPortfolio() {
     if (!rawName) return
     const normalizedName = rawName.toLowerCase()
     const targetType = skillType === 'Soft Skills' ? 'soft' : 'hard'
-    const updatedSkill = { name: rawName, progress }
+    const updatedSkill = {
+      name: rawName,
+      level: skillLevel || 'Middle',
+      progress: progress || 1,
+    }
 
     if (targetType === 'soft') {
       const duplicate = softSkills.some(
@@ -233,6 +225,9 @@ export default function SpecialistPortfolio() {
     setNewSkillName(skill.name)
     setSkillType(type === 'hard' ? 'Hard Skills' : 'Soft Skills')
     setSkillTypeOpen(false)
+    setSkillLevel(skill.level)
+    setSkillLevelOpen(false)
+    setProgressOpen(false)
     setProgress(skill.progress)
     setIsAddSkillOpen(true)
     setDotMenuId(null)
@@ -340,6 +335,9 @@ export default function SpecialistPortfolio() {
     setRatingOpen(false)
     setReviewsTypeOpen(false)
     setReviewsDateOpen(false)
+    setSkillTypeOpen(false)
+    setSkillLevelOpen(false)
+    setProgressOpen(false)
   })
 
   return (
@@ -404,6 +402,7 @@ export default function SpecialistPortfolio() {
                 setSkillLevel('')
                 setSkillTypeOpen(false)
                 setSkillLevelOpen(false)
+                setProgressOpen(false)
                 setProgress(0)
                 setIsAddSkillOpen(true)
               }}
@@ -504,11 +503,10 @@ export default function SpecialistPortfolio() {
           setSkillLevelOpen={setSkillLevelOpen}
           skillLevel={skillLevel}
           setSkillLevel={setSkillLevel}
+          progressOpen={progressOpen}
+          setProgressOpen={setProgressOpen}
           progress={progress}
-          onProgressChange={onProgressChange}
-          onProgressBlur={() => setProgress((value) => clamp01to10(value))}
-          onProgressInc={incProgress}
-          onProgressDec={decProgress}
+          setProgress={setProgress}
           onClose={resetSkillModal}
           onSave={handleAddSkill}
         />

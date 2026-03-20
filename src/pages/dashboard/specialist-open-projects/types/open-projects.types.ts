@@ -1,6 +1,7 @@
 export type OpenProject = {
   id: string
   title: string
+  projectType: string
   matchPercent: number
   matchLabel: string
   subtitle: string

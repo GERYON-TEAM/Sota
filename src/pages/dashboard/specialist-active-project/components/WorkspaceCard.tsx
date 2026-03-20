@@ -3,9 +3,10 @@ import AvatarsStack from './ui/AvatarsStack'
 type WorkspaceCardProps = {
   title: string
   onOpen?: () => void
+  onChatOpen?: () => void
 }
 
-export default function WorkspaceCard({ title, onOpen }: WorkspaceCardProps) {
+export default function WorkspaceCard({ title, onOpen, onChatOpen }: WorkspaceCardProps) {
   return (
     <div className="project-workspace__card">
       <div className="project-workspace__info">
@@ -38,6 +39,9 @@ export default function WorkspaceCard({ title, onOpen }: WorkspaceCardProps) {
           itemClassName="project-workspace__avatar"
           count={4}
         />
+        <button className="project-workspace__chat" type="button" onClick={onChatOpen}>
+          Чат
+        </button>
         <button className="project-workspace__open" type="button" onClick={onOpen}>
           Открыть
         </button>

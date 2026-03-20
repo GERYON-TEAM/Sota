@@ -54,16 +54,41 @@ export default function NewProjectFooter({
         </div>
       )}
 
-      <div className={`customer-new-project-nav${currentStep >= 3 ? ' is-single' : ''}`}>
-        <button className="customer-new-project-nav__back" type="button" onClick={onBack}>
-          Назад
-        </button>
-        {currentStep < 3 && (
-          <button className="customer-new-project-nav__next" type="button" onClick={onNext} disabled={!canNext}>
-            Далее
+      {currentStep === 3 ? (
+        <div className="customer-new-project-validation-side-bottom">
+          <div className="customer-new-project-validation-side-actions">
+            <button
+              className="customer-new-project-validation-side-actions__button customer-new-project-validation-side-actions__button--requirements"
+              type="button"
+            >
+              Изменить требования
+            </button>
+            <button
+              className="customer-new-project-validation-side-actions__button customer-new-project-validation-side-actions__button--balance"
+              type="button"
+            >
+              Изменить баланс проекта
+            </button>
+          </div>
+
+          <div className="customer-new-project-nav is-single">
+            <button className="customer-new-project-nav__back" type="button" onClick={onBack}>
+              Назад
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className={`customer-new-project-nav${currentStep >= 3 ? ' is-single' : ''}`}>
+          <button className="customer-new-project-nav__back" type="button" onClick={onBack}>
+            Назад
           </button>
-        )}
-      </div>
+          {currentStep < 3 && (
+            <button className="customer-new-project-nav__next" type="button" onClick={onNext} disabled={!canNext}>
+              Далее
+            </button>
+          )}
+        </div>
+      )}
 
       <span hidden>{totalSteps}</span>
     </aside>

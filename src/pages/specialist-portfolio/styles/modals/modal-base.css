@@ -3,6 +3,7 @@
   position: fixed;
   inset: 0;
   z-index: 50;
+  overflow-y: auto;
 }
 
 .edit-modal__backdrop {
@@ -18,7 +19,7 @@
   width: 637px;
   height: auto;
   max-height: 80vh;
-  overflow-y: auto;
+  overflow: visible;
   left: calc(50% - 637px / 2 + 0.5px);
   top: calc(50% - 718px / 2 - 47px);
   background: #ffffff;

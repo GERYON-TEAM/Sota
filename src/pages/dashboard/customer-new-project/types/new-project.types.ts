@@ -13,10 +13,15 @@ export type NewProjectStep = {
 }
 
 export type NewProjectFormValues = {
-  categoryValue: string
+  projectTypeValue: string
+  projectSizeValue: string
+  projectFeatureValues: string[]
   projectName: string
   projectDescription: string
+  projectNotes: string
   paymentTypeValue: string
+  flexibleDeadlines: boolean
+  projectBalanceValue: string
   maxHourlyRate: string
   budgetValue: string
   projectStart: string

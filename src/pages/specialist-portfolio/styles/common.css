@@ -4,7 +4,7 @@
 }
 
 .progress-steps--compact .progress-step {
-  width: 8px;
-  height: 20px;
-  border-radius: 10px;
+  width: 6px;
+  height: 22px;
+  border-radius: 11px;
 }

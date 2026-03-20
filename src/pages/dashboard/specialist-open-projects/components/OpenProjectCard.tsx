@@ -39,6 +39,7 @@ export default function OpenProjectCard({ project, matchClass, onOpen }: OpenPro
 
       <div className="open-project-info">
         <div className="open-project-title">{project.title}</div>
+        <div className="open-project-type">Тип проекта (категория): {project.projectType}</div>
         <div className="open-project-subtitle">{project.subtitle}</div>
 
         <div className="open-project-info__row">

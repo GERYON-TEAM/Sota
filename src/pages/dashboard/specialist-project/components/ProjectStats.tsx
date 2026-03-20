@@ -12,7 +12,8 @@ export default function ProjectStats({
   onOpenDescription,
 }: ProjectStatsProps) {
   const stats: ProjectStat[] = [
-    { label: 'Категория', value: 'Бэкенд' },
+    { label: 'Тип проекта (категория)', value: 'Веб-приложение' },
+    { label: 'Направление', value: 'Бэкенд' },
     { label: 'Уровень', value: 'Middle' },
     { label: 'Бюджет', value: 'Не публично' },
     { label: 'Сроки', value: '01.01.2025 - 01.01.2026' },

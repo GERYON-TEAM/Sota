@@ -17,3 +17,5 @@ export type ProjectCustomerStat = {
   label: string
   value: string
 }
+
+export type ProjectActionState = 'available' | 'applied' | 'invited' | 'in_team'

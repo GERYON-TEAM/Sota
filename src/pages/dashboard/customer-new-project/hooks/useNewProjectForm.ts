@@ -28,13 +28,19 @@ export function useNewProjectForm() {
   const path = window.location.pathname.toLowerCase()
   const dashboardBasePath = path.startsWith('/dashboard/custom') ? '/dashboard/custom' : '/dashboard/customer'
 
-  const [categoryOpen, setCategoryOpen] = useState(false)
-  const [categoryValue, setCategoryValue] = useState('Веб-разработка')
+  const [projectTypeOpen, setProjectTypeOpen] = useState(false)
+  const [projectSizeOpen, setProjectSizeOpen] = useState(false)
+  const [projectTypeValue, setProjectTypeValue] = useState('')
+  const [projectSizeValue, setProjectSizeValue] = useState('')
+  const [projectFeatureValues, setProjectFeatureValues] = useState<string[]>([])
   const [projectName, setProjectName] = useState('')
   const [projectDescription, setProjectDescription] = useState('')
+  const [projectNotes, setProjectNotes] = useState('')
 
   const [paymentTypeOpen, setPaymentTypeOpen] = useState(false)
   const [paymentTypeValue, setPaymentTypeValue] = useState('Поэтапно')
+  const [flexibleDeadlines, setFlexibleDeadlines] = useState(false)
+  const [projectBalanceValue, setProjectBalanceValue] = useState('Оптимально')
   const [maxHourlyRate, setMaxHourlyRate] = useState('')
   const [budgetValue, setBudgetValue] = useState('')
   const [projectStart, setProjectStart] = useState('')
@@ -95,13 +101,47 @@ export function useNewProjectForm() {
     [],
   )
 
-  const categories = useMemo(
-    () => ['Веб-разработка', 'Мобильная разработка', 'UI/UX дизайн', 'Бэкенд', 'DevOps'],
+  const projectTypes = useMemo(
+    () => [
+      'Веб-приложение',
+      'Мобильное приложение',
+      'Сервис/микросервисы (API)',
+      'Платформа данных',
+      'Инфраструктурный проект',
+      'Проект по дизайну (UI/UX)',
+    ],
+    [],
+  )
+
+  const projectSizes = useMemo(
+    () => [
+      'Небольшой прототип',
+      'Средний продукт',
+      'Большая платформа (долгий проект)',
+    ],
+    [],
+  )
+
+  const projectFeatures = useMemo(
+    () => [
+      'Одностраничный сайт / лэндинг',
+      'Подключение сторонних сервисов (оплата, CRM и т.п.)',
+      'Отчёты и аналитика',
+      'Умные подсказки и рекомендации',
+      'Работа под большой нагрузкой',
+      'Высокие требования к безопасности и конфиденциальности',
+      'Важен безотказный 24/7 доступ',
+    ],
     [],
   )
 
   const paymentTypes = useMemo(
     () => ['Поэтапно', 'Почасовая оплата', 'Фиксированная стоимость'],
+    [],
+  )
+
+  const projectBalances = useMemo(
+    () => ['Быстрее', 'Оптимально', 'Экономнее'],
     [],
   )
 
@@ -119,10 +159,15 @@ export function useNewProjectForm() {
 
   const values = useMemo<NewProjectFormValues>(
     () => ({
-      categoryValue,
+      projectTypeValue,
+      projectSizeValue,
+      projectFeatureValues,
       projectName,
       projectDescription,
+      projectNotes,
       paymentTypeValue,
+      flexibleDeadlines,
+      projectBalanceValue,
       maxHourlyRate,
       budgetValue,
       projectStart,
@@ -138,10 +183,15 @@ export function useNewProjectForm() {
       paymentCardCvc,
     }),
     [
-      categoryValue,
+      projectTypeValue,
+      projectSizeValue,
+      projectFeatureValues,
       projectName,
       projectDescription,
+      projectNotes,
       paymentTypeValue,
+      flexibleDeadlines,
+      projectBalanceValue,
       maxHourlyRate,
       budgetValue,
       projectStart,
@@ -176,7 +226,8 @@ export function useNewProjectForm() {
   }
 
   const closeDropdowns = () => {
-    setCategoryOpen(false)
+    setProjectTypeOpen(false)
+    setProjectSizeOpen(false)
     setPaymentTypeOpen(false)
     setPlanningModelOpen(false)
     setPlanningStackOpen(false)
@@ -184,10 +235,21 @@ export function useNewProjectForm() {
   }
 
   const applyDraft = (draft: Partial<NewProjectDraft>) => {
-    if (typeof draft.categoryValue === 'string') setCategoryValue(draft.categoryValue)
+    if (typeof draft.projectTypeValue === 'string') setProjectTypeValue(draft.projectTypeValue)
+    if (typeof draft.projectSizeValue === 'string') setProjectSizeValue(draft.projectSizeValue)
+    if (Array.isArray(draft.projectFeatureValues)) {
+      setProjectFeatureValues(
+        draft.projectFeatureValues.filter(
+          (value): value is string => typeof value === 'string' && value.trim().length > 0,
+        ),
+      )
+    }
     if (typeof draft.projectName === 'string') setProjectName(draft.projectName)
     if (typeof draft.projectDescription === 'string') setProjectDescription(draft.projectDescription)
+    if (typeof draft.projectNotes === 'string') setProjectNotes(draft.projectNotes)
     if (typeof draft.paymentTypeValue === 'string') setPaymentTypeValue(draft.paymentTypeValue)
+    if (typeof draft.flexibleDeadlines === 'boolean') setFlexibleDeadlines(draft.flexibleDeadlines)
+    if (typeof draft.projectBalanceValue === 'string') setProjectBalanceValue(draft.projectBalanceValue)
     if (typeof draft.maxHourlyRate === 'string') setMaxHourlyRate(draft.maxHourlyRate)
     if (typeof draft.budgetValue === 'string') setBudgetValue(draft.budgetValue)
     if (typeof draft.projectStart === 'string') setProjectStart(draft.projectStart)
@@ -221,19 +283,29 @@ export function useNewProjectForm() {
     steps,
     values,
     uploads,
-    categories,
+    projectTypes,
+    projectSizes,
+    projectFeatures,
     paymentTypes,
+    projectBalances,
     planningModels,
     planningStacks,
     planningComplexities,
-    categoryOpen,
-    setCategoryOpen,
-    setCategoryValue,
+    projectTypeOpen,
+    setProjectTypeOpen,
+    projectSizeOpen,
+    setProjectSizeOpen,
+    setProjectTypeValue,
+    setProjectSizeValue,
+    setProjectFeatureValues,
     paymentTypeOpen,
     setPaymentTypeOpen,
     setPaymentTypeValue,
+    setFlexibleDeadlines,
+    setProjectBalanceValue,
     setProjectName,
     setProjectDescription,
+    setProjectNotes,
     setMaxHourlyRate,
     setBudgetValue,
     setProjectStart,

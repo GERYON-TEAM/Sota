@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import CustomerSidebar from '../customer-dashboard/components/CustomerSidebar'
 import '../customer-dashboard/styles/index.css'
 import './styles/index.css'
@@ -20,7 +20,6 @@ import { useNewProjectValidation } from './hooks/useNewProjectValidation'
 import { useNewProjectSteps } from './hooks/useNewProjectSteps'
 import { useDraftAutosave } from './hooks/useDraftAutosave'
 import {
-  DASHBOARD_PUBLISH_NOTICE_STORAGE_KEY,
   type NewProjectDraft,
   NEW_PROJECT_DRAFT_SESSION_STORAGE_KEY,
   NEW_PROJECT_DRAFT_STORAGE_KEY,
@@ -31,6 +30,7 @@ export default function CustomerNewProjectPage() {
   const [confirmLeaveOpen, setConfirmLeaveOpen] = useState(false)
   const [successOpen, setSuccessOpen] = useState(false)
   const [templateOpen, setTemplateOpen] = useState(false)
+  const [planningLoadingActive, setPlanningLoadingActive] = useState(false)
 
   const form = useNewProjectForm()
   const validation = useNewProjectValidation(form.values)
@@ -47,44 +47,8 @@ export default function CustomerNewProjectPage() {
     },
   })
 
-  const summaryCards = useMemo(
-    () => [
-      { label: 'Бюджет фазы', value: form.values.budgetValue ? `${form.values.budgetValue} ₽` : 'Не указано' },
-      {
-        label: 'Сроки',
-        value:
-          form.values.projectStart && form.values.projectEnd
-            ? `${form.formatDate(form.values.projectStart)} - ${form.formatDate(form.values.projectEnd)}`
-            : 'Не указано',
-      },
-      { label: 'Тип оплаты', value: form.values.paymentTypeValue || 'Не указано' },
-      {
-        label: 'Макс. ставка / час',
-        value: form.values.maxHourlyRate ? `${form.values.maxHourlyRate} ₽` : 'Не указано',
-      },
-      { label: 'Модель управления', value: form.values.planningModelValue || 'Не указано' },
-      { label: 'Стек технологий', value: form.values.planningStackValue || 'Не указано' },
-      { label: 'Сложность', value: form.values.planningComplexityValue || 'Не указано' },
-      {
-        label: 'Файлы',
-        value: form.uploads.totalFilesCount > 0 ? `${form.uploads.totalFilesCount} шт.` : 'Не загружены',
-      },
-    ],
-    [
-      form,
-      form.values.budgetValue,
-      form.values.maxHourlyRate,
-      form.values.paymentTypeValue,
-      form.values.planningComplexityValue,
-      form.values.planningModelValue,
-      form.values.planningStackValue,
-      form.values.projectEnd,
-      form.values.projectStart,
-      form.uploads.totalFilesCount,
-    ],
-  )
-
   const currentStepMeta = form.steps[stepsState.step]
+  const isPlanningBusy = stepsState.step === 2 && planningLoadingActive
 
   const handleSaveDraft = () => {
     const isSaved = persist(form.createDraftPayload(stepsState.step))
@@ -93,48 +57,50 @@ export default function CustomerNewProjectPage() {
     }
   }
 
+  const handleDiscardAndExit = () => {
+    setConfirmLeaveOpen(false)
+    window.location.href = form.dashboardBasePath
+  }
+
   const handlePublish = () => {
     if (stepsState.step < form.steps.length - 1) {
       stepsState.goTo(form.steps.length - 1)
       return
     }
 
-    const noticePayload = {
-      title: 'Проект опубликован',
-      description: 'Ваш проект успешно выложен и доступен специалистам.',
-      durationMs: 4800,
-    }
-
-    try {
-      sessionStorage.setItem(DASHBOARD_PUBLISH_NOTICE_STORAGE_KEY, JSON.stringify(noticePayload))
-    } catch {
-      // ignore
-    }
-
     clear()
     setSuccessOpen(true)
-    window.location.href = form.dashboardBasePath
   }
 
   const renderCurrentStep = () => {
     if (stepsState.step === 0) {
       return (
         <BasicsStep
-          categoryOpen={form.categoryOpen}
-          categoryValue={form.values.categoryValue}
-          categories={form.categories}
+          projectTypeOpen={form.projectTypeOpen}
+          projectSizeOpen={form.projectSizeOpen}
+          projectTypeValue={form.values.projectTypeValue}
+          projectTypes={form.projectTypes}
+          projectSizeValue={form.values.projectSizeValue}
+          projectSizes={form.projectSizes}
+          projectFeatureValues={form.values.projectFeatureValues}
+          projectFeatures={form.projectFeatures}
           projectName={form.values.projectName}
           projectDescription={form.values.projectDescription}
+          projectNotes={form.values.projectNotes}
           files={form.uploads.files}
           draftFileNames={form.uploads.draftFileNames}
           totalFilesCount={form.uploads.totalFilesCount}
           isDragActive={form.uploads.isDragActive}
           uploadError={form.uploads.uploadError}
           fileInputRef={form.uploads.fileInputRef}
-          setCategoryOpen={form.setCategoryOpen}
-          setCategoryValue={form.setCategoryValue}
+          setProjectTypeOpen={form.setProjectTypeOpen}
+          setProjectSizeOpen={form.setProjectSizeOpen}
+          setProjectTypeValue={form.setProjectTypeValue}
+          setProjectSizeValue={form.setProjectSizeValue}
+          setProjectFeatureValues={form.setProjectFeatureValues}
           setProjectName={form.setProjectName}
           setProjectDescription={form.setProjectDescription}
+          setProjectNotes={form.setProjectNotes}
           handleFileInputChange={form.uploads.handleFileInputChange}
           handleDrop={form.uploads.handleDrop}
           setIsDragActive={form.uploads.setIsDragActive}
@@ -148,23 +114,20 @@ export default function CustomerNewProjectPage() {
     if (stepsState.step === 1) {
       return (
         <BudgetStep
-          paymentTypeOpen={form.paymentTypeOpen}
-          paymentTypeValue={form.values.paymentTypeValue}
-          paymentTypes={form.paymentTypes}
-          maxHourlyRate={form.values.maxHourlyRate}
+          flexibleDeadlines={form.values.flexibleDeadlines}
+          projectBalanceValue={form.values.projectBalanceValue}
+          projectBalances={form.projectBalances}
           budgetValue={form.values.budgetValue}
           projectStart={form.values.projectStart}
           projectEnd={form.values.projectEnd}
           startDateRef={form.startDateRef}
           endDateRef={form.endDateRef}
-          setPaymentTypeOpen={form.setPaymentTypeOpen}
-          setPaymentTypeValue={form.setPaymentTypeValue}
-          setMaxHourlyRate={form.setMaxHourlyRate}
+          setFlexibleDeadlines={form.setFlexibleDeadlines}
+          setProjectBalanceValue={form.setProjectBalanceValue}
           setBudgetValue={form.setBudgetValue}
           setProjectStart={form.setProjectStart}
           setProjectEnd={form.setProjectEnd}
           sanitizeDigits={form.sanitizeDigits}
-          stepNumericValue={form.stepNumericValue}
           formatDate={form.formatDate}
           openDatePicker={form.openDatePicker}
         />
@@ -184,6 +147,7 @@ export default function CustomerNewProjectPage() {
           planningComplexityValue={form.values.planningComplexityValue}
           planningComplexities={form.planningComplexities}
           planningPreviewVisible={form.values.planningPreviewVisible}
+          onLoadingStateChange={setPlanningLoadingActive}
           setPlanningModelOpen={form.setPlanningModelOpen}
           setPlanningModelValue={form.setPlanningModelValue}
           setPlanningStackOpen={form.setPlanningStackOpen}
@@ -200,14 +164,18 @@ export default function CustomerNewProjectPage() {
         <ReviewStep
           projectName={form.values.projectName}
           projectDescription={form.values.projectDescription}
-          categoryOpen={form.categoryOpen}
-          categoryValue={form.values.categoryValue}
-          categories={form.categories}
+          projectTypeOpen={form.projectTypeOpen}
+          projectTypeValue={form.values.projectTypeValue}
+          projectTypes={form.projectTypes}
+          budgetValue={form.values.budgetValue}
+          projectStart={form.values.projectStart}
+          projectEnd={form.values.projectEnd}
           setProjectName={form.setProjectName}
           setProjectDescription={form.setProjectDescription}
-          setCategoryOpen={form.setCategoryOpen}
-          setCategoryValue={form.setCategoryValue}
-          summaryCards={summaryCards}
+          projectNotes={form.values.projectNotes}
+          setProjectTypeOpen={form.setProjectTypeOpen}
+          setProjectTypeValue={form.setProjectTypeValue}
+          setProjectNotes={form.setProjectNotes}
         />
       )
     }
@@ -254,28 +222,40 @@ export default function CustomerNewProjectPage() {
         >
           <NewProjectSteps steps={form.steps} currentStep={stepsState.step} />
 
-          <section className="customer-new-project-layout">
-            <div className="customer-new-project-main">
-              <div className="customer-new-project-intro">
-                <h2 className="customer-new-project-intro__title">{currentStepMeta.title}</h2>
-                <p className="customer-new-project-intro__text">{currentStepMeta.description}</p>
-              </div>
+          <section className={`customer-new-project-layout${isPlanningBusy ? ' customer-new-project-layout--planning-loading' : ''}`}>
+            <div className={`customer-new-project-main${isPlanningBusy ? ' customer-new-project-main--planning-loading' : ''}`}>
+              {!isPlanningBusy && (
+                <div className="customer-new-project-intro">
+                  <h2 className="customer-new-project-intro__title">{currentStepMeta.title}</h2>
+                  <p className="customer-new-project-intro__text">{currentStepMeta.description}</p>
+                </div>
+              )}
 
               {renderCurrentStep()}
+
+              <button
+                className="customer-new-project-exit"
+                type="button"
+                onClick={() => setConfirmLeaveOpen(true)}
+              >
+                Выйти
+              </button>
             </div>
 
-            <NewProjectFooter
-              currentStep={stepsState.step}
-              totalSteps={form.steps.length}
-              canNext={stepsState.canNext}
-              validationAgreement={form.values.validationAgreement}
-              onSaveDraft={handleSaveDraft}
-              onSkipPlanning={() => stepsState.next()}
-              onPublish={handlePublish}
-              onBack={() => stepsState.back()}
-              onNext={() => stepsState.next()}
-              onValidationAgreementChange={form.setValidationAgreement}
-            />
+            {!isPlanningBusy && (
+              <NewProjectFooter
+                currentStep={stepsState.step}
+                totalSteps={form.steps.length}
+                canNext={stepsState.canNext}
+                validationAgreement={form.values.validationAgreement}
+                onSaveDraft={handleSaveDraft}
+                onSkipPlanning={() => stepsState.next()}
+                onPublish={handlePublish}
+                onBack={() => stepsState.back()}
+                onNext={() => stepsState.next()}
+                onValidationAgreementChange={form.setValidationAgreement}
+              />
+            )}
           </section>
         </div>
       </main>
@@ -283,12 +263,20 @@ export default function CustomerNewProjectPage() {
       <ConfirmLeaveModal
         isOpen={confirmLeaveOpen}
         onClose={() => setConfirmLeaveOpen(false)}
-        onConfirm={() => {
+        onDiscard={handleDiscardAndExit}
+        onSaveAndExit={() => {
           setConfirmLeaveOpen(false)
           handleSaveDraft()
         }}
       />
-      <SuccessModal isOpen={successOpen} onClose={() => setSuccessOpen(false)} />
+      <SuccessModal
+        isOpen={successOpen}
+        onClose={() => setSuccessOpen(false)}
+        onGoToProjects={() => {
+          setSuccessOpen(false)
+          window.location.href = form.dashboardBasePath
+        }}
+      />
       <TemplateModal isOpen={templateOpen} onClose={() => setTemplateOpen(false)} />
     </div>
   )

@@ -63,7 +63,7 @@ export default function OpenProjectsFilterModal({
         </div>
 
         <FilterSelect
-          label="Категория"
+          label="Направление"
           isOpen={categoryOpen}
           selected={selectedCategories}
           options={categories}

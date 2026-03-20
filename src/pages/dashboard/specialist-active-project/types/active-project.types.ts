@@ -7,10 +7,19 @@ export type ValidationCriterion = {
   description: string
 }
 
+export type ChatAttachment = {
+  id: string
+  name: string
+  sizeLabel: string
+  kind: 'image' | 'document'
+  previewUrl?: string
+}
+
 export type ChatMessage = {
   id: number
   author: string
   text: string
   time: string
   isMe: boolean
+  attachments?: ChatAttachment[]
 }

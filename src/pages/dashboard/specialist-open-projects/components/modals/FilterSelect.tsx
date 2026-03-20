@@ -26,7 +26,7 @@ export default function FilterSelect({
           type="button"
           onClick={onToggle}
         >
-          <span>{selected.length > 0 ? selected.join(', ') : 'Выберите категории'}</span>
+          <span>{selected.length > 0 ? selected.join(', ') : 'Выберите направление'}</span>
           <span className="filter-modal__select-actions">
             {selected.length > 0 && (
               <button

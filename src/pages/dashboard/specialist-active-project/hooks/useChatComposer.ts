@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { ChatMessage } from '../types/active-project.types'
+import type { ChatAttachment, ChatMessage } from '../types/active-project.types'
 
 const initialMessages: ChatMessage[] = [
   {
@@ -22,9 +22,11 @@ export const useChatComposer = () => {
   const [chatInput, setChatInput] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
 
-  const sendMessage = () => {
-    const trimmed = chatInput.trim()
-    if (!trimmed) return
+  const sendMessage = (payload?: { text?: string; attachments?: ChatAttachment[] }) => {
+    const trimmed = (payload?.text ?? chatInput).trim()
+    const attachments = payload?.attachments ?? []
+    if (!trimmed && attachments.length === 0) return
+
     setMessages((prev) => [
       ...prev,
       {
@@ -33,6 +35,7 @@ export const useChatComposer = () => {
         text: trimmed,
         time: 'сейчас',
         isMe: true,
+        attachments,
       },
     ])
     setChatInput('')

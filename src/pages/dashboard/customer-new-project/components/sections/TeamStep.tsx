@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import Select from '../ui/Select'
 
 type TeamStepProps = {
@@ -11,6 +12,7 @@ type TeamStepProps = {
   planningComplexityValue: string
   planningComplexities: string[]
   planningPreviewVisible: boolean
+  onLoadingStateChange: (next: boolean) => void
   setPlanningModelOpen: (next: boolean) => void
   setPlanningModelValue: (value: string) => void
   setPlanningStackOpen: (next: boolean) => void
@@ -18,6 +20,59 @@ type TeamStepProps = {
   setPlanningComplexityOpen: (next: boolean) => void
   setPlanningComplexityValue: (value: string) => void
   setPlanningPreviewVisible: (next: boolean | ((prev: boolean) => boolean)) => void
+}
+
+function PlanningLoadingLogo() {
+  return (
+    <svg
+      width="316"
+      height="335"
+      viewBox="0 0 316 335"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      className="customer-new-project-plan__animated-logo"
+    >
+      <path
+        d="M166.714 7.11136C166.714 2.53965 170.794 -1.00964 175.205 0.260499C177.387 0.888649 179.542 1.64158 181.658 2.5192L297.772 66.7819C307.32 75.8436 313.687 87.8267 315.782 100.908V234.099C313.686 247.177 307.319 259.157 297.773 268.217L181.648 332.485C179.535 333.361 177.384 334.112 175.205 334.74C170.794 336.01 166.714 332.46 166.714 327.889V7.11136Z"
+        fill="#F8F9FD"
+      />
+      <path
+        d="M147.797 327.191C147.797 331.878 143.519 335.451 139.056 333.955C135.865 332.884 132.741 331.542 129.722 329.925L121.935 325.757L103.804 315.245C94.0736 309.967 88.0181 299.818 88.0181 288.787V46.2114C88.0183 35.1807 94.0734 25.0308 103.804 19.753L121.884 9.27061L129.722 5.07617C132.742 3.45972 135.865 2.11593 139.057 1.04485C143.519 -0.452405 147.797 3.12052 147.797 7.80779V327.191Z"
+        fill="#F8F9FD"
+      />
+      <path
+        d="M78.9379 289.373C78.9379 295.03 72.9091 298.668 67.8713 296.052L49.3221 286.42C39.5919 281.142 33.5365 269.486 33.5365 258.455V76.6259C33.5366 65.595 39.5918 53.9388 49.3221 48.661L67.8716 39.0296C72.9093 36.4139 78.9379 40.0523 78.9379 45.7084V289.373Z"
+        fill="#F8F9FD"
+      />
+      <path
+        d="M25.9696 257.96C25.9696 264.052 19.3141 267.248 15.4073 262.559C6.40812 251.759 0.242232 237.185 0.242188 224.601V110.401C0.242188 96.309 5.98195 82.5085 15.0398 71.7101C19.0343 66.9479 25.9696 70.2074 25.9696 76.4114V257.96Z"
+        fill="#F8F9FD"
+      />
+      <g className="customer-new-project-plan__animated-hi">
+        <path
+          d="M166.725 7.11136C166.725 2.53965 170.811 -1.00964 175.23 0.260499C177.415 0.888649 179.573 1.64158 181.692 2.5192L297.983 66.7819C307.545 75.8436 313.922 87.8267 316.02 100.908V234.099C313.921 247.177 307.544 259.157 297.984 268.217L181.682 332.485C179.566 333.361 177.411 334.112 175.23 334.74C170.811 336.01 166.725 332.46 166.725 327.889V7.11136Z"
+          fill="#5260FF"
+          className="customer-new-project-plan__animated-seg seg-1"
+        />
+        <path
+          d="M147.779 327.191C147.779 331.878 143.495 335.451 139.026 333.955C135.829 332.884 132.701 331.542 129.677 329.925L121.878 325.757L103.719 315.245C93.9743 309.967 87.9096 299.818 87.9096 288.787V46.2114C87.9097 35.1807 93.9741 25.0308 103.719 19.753L121.827 9.27061L129.677 5.07617C132.701 3.45972 135.829 2.11593 139.026 1.04485C143.495 -0.452405 147.779 3.12052 147.779 7.80779V327.191Z"
+          fill="#5260FF"
+          className="customer-new-project-plan__animated-seg seg-2"
+        />
+        <path
+          d="M78.8155 289.373C78.8155 295.03 72.7775 298.668 67.7321 296.052L49.1546 286.42C39.4096 281.142 33.345 269.486 33.345 258.455V76.6259C33.3452 65.595 39.4095 53.9388 49.1546 48.661L67.7324 39.0296C72.7778 36.4139 78.8155 40.0523 78.8155 45.7084V289.373Z"
+          fill="#5260FF"
+          className="customer-new-project-plan__animated-seg seg-3"
+        />
+        <path
+          d="M25.7666 257.96C25.7666 264.052 19.1009 267.248 15.1882 262.559C6.17532 251.759 4.4327e-05 237.185 0 224.601V110.401C6.19706e-07 96.309 5.7485 82.5085 14.8201 71.7101C18.8207 66.9479 25.7666 70.2074 25.7666 76.4114V257.96Z"
+          fill="#5260FF"
+          className="customer-new-project-plan__animated-seg seg-4"
+        />
+      </g>
+    </svg>
+  )
 }
 
 export default function TeamStep(props: TeamStepProps) {
@@ -32,6 +87,7 @@ export default function TeamStep(props: TeamStepProps) {
     planningComplexityValue,
     planningComplexities,
     planningPreviewVisible,
+    onLoadingStateChange,
     setPlanningModelOpen,
     setPlanningModelValue,
     setPlanningStackOpen,
@@ -41,11 +97,77 @@ export default function TeamStep(props: TeamStepProps) {
     setPlanningPreviewVisible,
   } = props
 
-  const planCards = [
-    { title: 'Design', hours: '50 часов', index: '01' },
-    { title: 'Frontend', hours: '90 часов', index: '02' },
-    { title: 'Backend', hours: '70 часов', index: '03' },
-  ]
+  const [initialLoading, setInitialLoading] = useState(true)
+  const [initialLoadingProgress, setInitialLoadingProgress] = useState(0)
+  const [loadingProgress, setLoadingProgress] = useState(0)
+
+  useEffect(() => {
+    const startedAt = Date.now()
+    const intervalId = window.setInterval(() => {
+      const elapsed = Date.now() - startedAt
+      const nextProgress = Math.min(100, Math.round((elapsed / 5000) * 100))
+      setInitialLoadingProgress(nextProgress)
+    }, 50)
+
+    const timeoutId = window.setTimeout(() => {
+      setInitialLoading(false)
+      setInitialLoadingProgress(100)
+    }, 5000)
+
+    return () => {
+      window.clearInterval(intervalId)
+      window.clearTimeout(timeoutId)
+    }
+  }, [])
+
+  useEffect(() => {
+    onLoadingStateChange(initialLoading || planningPreviewVisible)
+  }, [initialLoading, onLoadingStateChange, planningPreviewVisible])
+
+  useEffect(() => {
+    return () => onLoadingStateChange(false)
+  }, [onLoadingStateChange])
+
+  useEffect(() => {
+    if (!planningPreviewVisible) {
+      setLoadingProgress(0)
+      return
+    }
+
+    const startedAt = Date.now()
+    const intervalId = window.setInterval(() => {
+      const elapsed = Date.now() - startedAt
+      const nextProgress = Math.min(100, Math.round((elapsed / 5000) * 100))
+      setLoadingProgress(nextProgress)
+    }, 50)
+
+    return () => window.clearInterval(intervalId)
+  }, [planningPreviewVisible])
+
+  if (initialLoading) {
+    return (
+      <section className="customer-new-project-plan customer-new-project-plan--intro-loading">
+        <div className="customer-new-project-plan__loading-head">
+          <strong>Генерация плана</strong>
+          <span>Строим планы и рассчитываем сроки...</span>
+        </div>
+
+        <div className="customer-new-project-plan__loading-center">
+          <div className="customer-new-project-plan__hero-loader" aria-hidden="true">
+            <PlanningLoadingLogo />
+          </div>
+
+          <div className="customer-new-project-plan__progress customer-new-project-plan__progress--intro">
+            {initialLoadingProgress}%
+          </div>
+
+          <p className="customer-new-project-plan__note">
+            Генерация может занимать некоторое время
+          </p>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <div className="customer-new-project-form">
@@ -99,27 +221,36 @@ export default function TeamStep(props: TeamStepProps) {
 
       <div className="customer-new-project-planning__actions">
         <button className="customer-new-project-planning__show-btn" type="button" onClick={() => setPlanningPreviewVisible((prev) => !prev)}>
-          Показать схему и сроки
+          Генерация плана
         </button>
       </div>
 
       {planningPreviewVisible && (
-        <section className="customer-new-project-plan">
-          <div className="customer-new-project-plan__head">
-            <strong>Web Dev</strong>
-            <span>*Указанные данные рассчитаны предварительно</span>
+        <section className="customer-new-project-plan customer-new-project-plan--loading">
+          <div className="customer-new-project-plan__loading-head">
+            <strong>Генерация плана</strong>
+            <span>Строим планы и рассчитываем сроки...</span>
           </div>
-          <div className="customer-new-project-plan__cards">
-            {planCards.map((card) => (
-              <article className="customer-new-project-plan-card" key={card.index}>
-                <div className="customer-new-project-plan-card__top">
-                  <span>{card.title}</span>
-                  <span className="customer-new-project-plan-card__index">{card.index}</span>
-                </div>
-                <strong>{card.hours}</strong>
-              </article>
-            ))}
+
+          <div className="customer-new-project-plan__loading-center">
+            <div className="customer-new-project-plan__hero-loader" aria-hidden="true">
+              <PlanningLoadingLogo />
+            </div>
+
+            <div className="customer-new-project-plan__progress">{loadingProgress}%</div>
+
+            <p className="customer-new-project-plan__note">
+              Генерация может занимать некоторое время.
+            </p>
           </div>
+
+          <button
+            className="customer-new-project-plan__exit"
+            type="button"
+            onClick={() => setPlanningPreviewVisible(false)}
+          >
+            Выйти
+          </button>
         </section>
       )}
     </div>

@@ -12,7 +12,7 @@ export default function CustomerProjectStats({
   onOpenDescription,
 }: ProjectStatsProps) {
   const stats: ProjectStat[] = [
-    { label: 'Категория проекта', value: 'Разработка' },
+    { label: 'Тип проекта', value: 'Веб-приложение' },
     { label: 'Загруженные файлы', value: '5' },
   ]
 

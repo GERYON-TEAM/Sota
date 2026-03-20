@@ -4,19 +4,40 @@ type SelectProps = {
   label: string
   value: string
   options: string[]
+  placeholder?: string
   open: boolean
   onToggle: () => void
   onSelect: (value: string) => void
 }
 
-export default function Select({ label, value, options, open, onToggle, onSelect }: SelectProps) {
+export default function Select({
+  label,
+  value,
+  options,
+  placeholder = 'Выберите значение',
+  open,
+  onToggle,
+  onSelect,
+}: SelectProps) {
   const menuId = useId()
 
   return (
-    <div className="customer-new-project-form__group customer-new-project-form__group--dropdown">
+    <div
+      className="customer-new-project-form__group customer-new-project-form__group--dropdown"
+      onClick={(event) => event.stopPropagation()}
+    >
       <span className="customer-new-project-form__label">{label}</span>
-      <button className={`customer-new-project-form__select${open ? ' is-open' : ''}`} type="button" onClick={onToggle}>
-        <span>{value}</span>
+      <button
+        className={`customer-new-project-form__select${open ? ' is-open' : ''}`}
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation()
+          onToggle()
+        }}
+      >
+        <span className={value ? '' : 'customer-new-project-form__select-placeholder'}>
+          {value || placeholder}
+        </span>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M7 10L12 15L17 10" stroke="#696E82" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
