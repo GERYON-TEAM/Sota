@@ -9,6 +9,7 @@ from app.core.security import decode_token
 from app.core.exceptions import AuthenticationError
 from app.services.auth_service import AuthService
 from app.services.specialist_service import SpecialistService
+from app.services.project_service import ProjectService
 
 oauth2_scheme = HTTPBearer()
 
@@ -48,3 +49,7 @@ async def get_auth_service(db: AsyncSession = Depends(get_db)) -> AuthService:
 
 async def get_specialist_service(db: AsyncSession = Depends(get_db)) -> SpecialistService:
     return SpecialistService(db)
+
+
+async def get_project_service(db: AsyncSession = Depends(get_db)) -> ProjectService:
+    return ProjectService(db)

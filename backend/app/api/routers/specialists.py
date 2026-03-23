@@ -20,6 +20,14 @@ from app.schemas.specialist_schemas import (
     CreateReviewResponse,
     UpdateReviewRequest,
     UpdateReviewResponse,
+    SkillsListResponse,
+    SkillsUpdateRequest,
+    SkillsUpdateResponse,
+    PdpListResponse,
+    PdpUpdateRequest,
+    PdpUpdateResponse,
+    LevelProgressResponse,
+    RatingResponse,
 )
 from app.core.exceptions import ForbiddenError
 from app.core.limiter import limiter
@@ -101,8 +109,90 @@ async def handle_invitation(
     )
 
 
-@router.get("/{specialist_id}/reviews", response_model=ReviewsListResponse)
+@router.get("/me/skills", response_model=SkillsListResponse)
 @limiter.limit("30/minute")
+async def get_my_skills(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    specialist_service: SpecialistService = Depends(get_specialist_service),
+):
+    if current_user.role != "specialist":
+        raise ForbiddenError(detail="Доступ только для специалистов")
+
+    return await specialist_service.get_skills(current_user.id)
+
+
+@router.patch("/me/skills", response_model=SkillsUpdateResponse)
+@limiter.limit("30/minute")
+async def update_my_skills(
+    request: Request,
+    body: SkillsUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    specialist_service: SpecialistService = Depends(get_specialist_service),
+):
+    if current_user.role != "specialist":
+        raise ForbiddenError(detail="Доступ только для специалистов")
+
+    skills_data = [s.model_dump() for s in body.skills]
+    return await specialist_service.update_skills(current_user.id, skills_data)
+
+
+@router.get("/me/pdp", response_model=PdpListResponse)
+@limiter.limit("30/minute")
+async def get_my_pdp(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    specialist_service: SpecialistService = Depends(get_specialist_service),
+):
+    if current_user.role != "specialist":
+        raise ForbiddenError(detail="Доступ только для специалистов")
+
+    return await specialist_service.get_pdp(current_user.id)
+
+
+@router.patch("/me/pdp", response_model=PdpUpdateResponse)
+@limiter.limit("30/minute")
+async def update_my_pdp(
+    request: Request,
+    body: PdpUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    specialist_service: SpecialistService = Depends(get_specialist_service),
+):
+    if current_user.role != "specialist":
+        raise ForbiddenError(detail="Доступ только для специалистов")
+
+    data = body.model_dump(exclude_unset=True, exclude={"goal_id"})
+    return await specialist_service.update_pdp(current_user.id, body.goal_id, data)
+
+
+@router.get("/me/level-progress", response_model=LevelProgressResponse)
+@limiter.limit("30/minute")
+async def get_level_progress(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    specialist_service: SpecialistService = Depends(get_specialist_service),
+):
+    if current_user.role != "specialist":
+        raise ForbiddenError(detail="Доступ только для специалистов")
+
+    return await specialist_service.get_level_progress(current_user.id)
+
+
+@router.get("/me/rating", response_model=RatingResponse)
+@limiter.limit("30/minute")
+async def get_my_rating(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    specialist_service: SpecialistService = Depends(get_specialist_service),
+):
+    if current_user.role != "specialist":
+        raise ForbiddenError(detail="Доступ только для специалистов")
+
+    return await specialist_service.get_rating(current_user.id)
+
+
+@router.get("/{specialist_id}/reviews", response_model=ReviewsListResponse)
+@limiter.limit("100/minute")
 async def get_reviews(
     request: Request,
     specialist_id: str,
@@ -157,7 +247,7 @@ async def update_review(
 
 
 @router.get("/{specialist_id}/projects", response_model=SpecialistProjectsResponse)
-@limiter.limit("30/minute")
+@limiter.limit("100/minute")
 async def get_specialist_projects(
     request: Request,
     specialist_id: str,
@@ -182,8 +272,30 @@ async def update_project_visibility(
     )
 
 
+@router.get("/{specialist_id}/skills", response_model=SkillsListResponse)
+@limiter.limit("100/minute")
+async def get_specialist_skills(
+    request: Request,
+    specialist_id: str,
+    current_user: User = Depends(get_current_user),
+    specialist_service: SpecialistService = Depends(get_specialist_service),
+):
+    return await specialist_service.get_specialist_skills(specialist_id)
+
+
+@router.get("/{specialist_id}/pdp", response_model=PdpListResponse)
+@limiter.limit("100/minute")
+async def get_specialist_pdp(
+    request: Request,
+    specialist_id: str,
+    current_user: User = Depends(get_current_user),
+    specialist_service: SpecialistService = Depends(get_specialist_service),
+):
+    return await specialist_service.get_specialist_pdp(specialist_id)
+
+
 @router.get("/{specialist_id}", response_model=ProfileResponse)
-@limiter.limit("30/minute")
+@limiter.limit("100/minute")
 async def get_public_profile(
     request: Request,
     specialist_id: str,

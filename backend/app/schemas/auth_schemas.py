@@ -12,6 +12,34 @@ class RegisterRequest(BaseModel):
     level: Optional[str] = None
 
 
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+
+class Verify2FARequest(BaseModel):
+    session_id: str
+    code: str
+
+
+class PasswordResetRequest(BaseModel):
+    email: str
+
+
+class ChangeEmailRequest(BaseModel):
+    new_email: str
+    password: str
+
+
+class ProfileUpdateRequest(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    middle_name: Optional[str] = None
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
 class LoginRequest(BaseModel):
     email: str
     password: str

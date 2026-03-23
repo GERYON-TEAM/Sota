@@ -10,6 +10,9 @@ from app.db.repositories import (
     SpecialistInvitationRepository,
     SpecialistProjectHistoryRepository,
     SpecialistReviewRepository,
+    SpecialistSkillRepository,
+    SpecialistPdpRepository,
+    ProjectRepository,
 )
 from app.core.exceptions import NotFoundError, ForbiddenError, ConflictError
 
@@ -23,6 +26,9 @@ class SpecialistService:
         self.invitation_repo = SpecialistInvitationRepository(db)
         self.project_repo = SpecialistProjectHistoryRepository(db)
         self.review_repo = SpecialistReviewRepository(db)
+        self.skill_repo = SpecialistSkillRepository(db)
+        self.pdp_repo = SpecialistPdpRepository(db)
+        self.project_table_repo = ProjectRepository(db)
 
     async def get_dashboard(self, user_id: str) -> dict:
         try:
@@ -35,7 +41,8 @@ class SpecialistService:
             user = await self.user_repo.get_by_id(user_id)
             name = user.first_name + " " + user.last_name
 
-            # приглашения
+            await self.invitation_repo.mark_expired(profile.id)
+
             inv = await self.invitation_repo.get_pending_stats(profile.id)
 
             # проекты
@@ -253,6 +260,8 @@ class SpecialistService:
             if not profile:
                 raise NotFoundError(detail="Профиль специалиста не найден")
 
+            await self.invitation_repo.mark_expired(profile.id)
+
             result = await self.invitation_repo.get_list(profile.id, status, page, limit)
             items = result["items"]
             total = result["total"]
@@ -320,6 +329,17 @@ class SpecialistService:
                 update_data["rejection_reason"] = rejection_reason
 
             await self.invitation_repo.update(invitation.id, update_data)
+
+            if action == "accept":
+                await self.project_table_repo.update(
+                    invitation.project_id, {"status": "team_matching"}
+                )
+
+            if action == "reject":
+                logger.info(
+                    "invitation_rejected specialist_id=%s project_id=%s reason=%s",
+                    profile.id, invitation.project_id, rejection_reason,
+                )
 
             message = "Приглашение принято" if action == "accept" else "Приглашение отклонено"
 
@@ -443,6 +463,8 @@ class SpecialistService:
                 "updated_at": datetime.utcnow(),
             })
 
+            await self._recalculate_level_progress(specialist_id)
+
             return {
                 "review_id": str(review.id),
                 "specialist_id": str(specialist_id),
@@ -494,6 +516,7 @@ class SpecialistService:
                     "rating": round(stats["avg_rating"], 2),
                     "updated_at": now,
                 })
+                await self._recalculate_level_progress(specialist_id)
 
             updated_review = await self.review_repo.get_by_id(review.id)
 
@@ -511,4 +534,327 @@ class SpecialistService:
             raise
         except Exception as e:
             logger.exception("Ошибка в update_review")
+            raise HTTPException(status_code=500, detail="Внутренняя ошибка сервера")
+
+    async def get_skills(self, user_id: str) -> dict:
+        try:
+            profile = await self.profile_repo.get_by_user_id(user_id)
+            if not profile:
+                raise NotFoundError(detail="Профиль специалиста не найден")
+
+            rows = await self.skill_repo.get_by_specialist_id(profile.id)
+
+            skills = []
+            for s in rows:
+                skills.append({
+                    "id": str(s.id),
+                    "skill_name": s.skill_name,
+                    "skill_type": s.skill_type,
+                    "proficiency": s.proficiency,
+                    "projects_used": s.projects_used,
+                    "created_at": s.created_at.isoformat(),
+                    "updated_at": s.updated_at.isoformat() if s.updated_at else None,
+                })
+
+            return {"skills": skills}
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception("Ошибка в get_skills")
+            raise HTTPException(status_code=500, detail="Внутренняя ошибка сервера")
+
+    async def get_specialist_skills(self, specialist_id: str) -> dict:
+        try:
+            profile = await self.profile_repo.get_by_id(specialist_id)
+            if not profile:
+                raise NotFoundError(detail="Специалист не найден")
+
+            if not profile.is_public:
+                raise ForbiddenError(detail="Профиль скрыт")
+
+            rows = await self.skill_repo.get_by_specialist_id(specialist_id)
+
+            skills = []
+            for s in rows:
+                skills.append({
+                    "id": str(s.id),
+                    "skill_name": s.skill_name,
+                    "skill_type": s.skill_type,
+                    "proficiency": s.proficiency,
+                    "projects_used": s.projects_used,
+                    "created_at": s.created_at.isoformat(),
+                    "updated_at": s.updated_at.isoformat() if s.updated_at else None,
+                })
+
+            return {"skills": skills}
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception("Ошибка в get_specialist_skills")
+            raise HTTPException(status_code=500, detail="Внутренняя ошибка сервера")
+
+    async def update_skills(self, user_id: str, skills_input: list[dict]) -> dict:
+        try:
+            profile = await self.profile_repo.get_by_user_id(user_id)
+            if not profile:
+                raise NotFoundError(detail="Профиль специалиста не найден")
+
+            names = [s["skill_name"] for s in skills_input]
+            if len(names) != len(set(names)):
+                raise ConflictError(detail="Дублирующиеся названия навыков")
+
+            existing = await self.skill_repo.get_by_specialist_id(profile.id)
+            existing_map = {s.skill_name: s for s in existing}
+
+            now = datetime.utcnow()
+
+            await self.skill_repo.delete_by_specialist_id(profile.id)
+
+            new_items = []
+            for s in skills_input:
+                old = existing_map.get(s["skill_name"])
+                new_items.append({
+                    "specialist_id": profile.id,
+                    "skill_name": s["skill_name"],
+                    "skill_type": s["skill_type"],
+                    "proficiency": s["proficiency"],
+                    "projects_used": old.projects_used if old else 0,
+                    "created_at": old.created_at if old else now,
+                    "updated_at": now if old else None,
+                })
+
+            created = await self.skill_repo.bulk_create(new_items)
+
+            skills = []
+            for s in created:
+                skills.append({
+                    "id": str(s.id),
+                    "skill_name": s.skill_name,
+                    "skill_type": s.skill_type,
+                    "proficiency": s.proficiency,
+                    "projects_used": s.projects_used,
+                    "created_at": s.created_at.isoformat(),
+                    "updated_at": s.updated_at.isoformat() if s.updated_at else None,
+                })
+
+            await self.profile_repo.update(profile.id, {"updated_at": now})
+
+            return {
+                "skills": skills,
+                "updated_at": now.isoformat(),
+                "message": "Навыки успешно обновлены",
+            }
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception("Ошибка в update_skills")
+            raise HTTPException(status_code=500, detail="Внутренняя ошибка сервера")
+
+    async def get_pdp(self, user_id: str) -> dict:
+        try:
+            profile = await self.profile_repo.get_by_user_id(user_id)
+            if not profile:
+                raise NotFoundError(detail="Профиль специалиста не найден")
+
+            rows = await self.pdp_repo.get_by_specialist_id(profile.id)
+
+            goals = []
+            for g in rows:
+                goals.append({
+                    "id": str(g.id),
+                    "goal_title": g.goal_title,
+                    "goal_description": g.goal_description,
+                    "status": g.status,
+                    "progress_percent": g.progress_percent,
+                    "start_date": g.start_date.isoformat() if g.start_date else None,
+                    "end_date": g.end_date.isoformat() if g.end_date else None,
+                    "created_at": g.created_at.isoformat(),
+                    "updated_at": g.updated_at.isoformat() if g.updated_at else None,
+                })
+
+            return {"goals": goals}
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception("Ошибка в get_pdp")
+            raise HTTPException(status_code=500, detail="Внутренняя ошибка сервера")
+
+    async def get_specialist_pdp(self, specialist_id: str) -> dict:
+        try:
+            profile = await self.profile_repo.get_by_id(specialist_id)
+            if not profile:
+                raise NotFoundError(detail="Специалист не найден")
+
+            if not profile.is_public:
+                raise ForbiddenError(detail="Профиль скрыт")
+
+            rows = await self.pdp_repo.get_by_specialist_id(specialist_id)
+
+            goals = []
+            for g in rows:
+                if g.status == "archived":
+                    continue
+                goals.append({
+                    "id": str(g.id),
+                    "goal_title": g.goal_title,
+                    "goal_description": g.goal_description,
+                    "status": g.status,
+                    "progress_percent": g.progress_percent,
+                    "start_date": g.start_date.isoformat() if g.start_date else None,
+                    "end_date": g.end_date.isoformat() if g.end_date else None,
+                    "created_at": g.created_at.isoformat(),
+                    "updated_at": g.updated_at.isoformat() if g.updated_at else None,
+                })
+
+            return {"goals": goals}
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception("Ошибка в get_specialist_pdp")
+            raise HTTPException(status_code=500, detail="Внутренняя ошибка сервера")
+
+    async def update_pdp(self, user_id: str, goal_id: str, data: dict) -> dict:
+        try:
+            profile = await self.profile_repo.get_by_user_id(user_id)
+            if not profile:
+                raise NotFoundError(detail="Профиль специалиста не найден")
+
+            goal = await self.pdp_repo.get_by_id_and_specialist(goal_id, profile.id)
+            if not goal:
+                raise NotFoundError(detail="Цель не найдена")
+
+            if goal.status == "archived":
+                raise ConflictError(detail="Нельзя обновлять архивную цель")
+
+            if not data:
+                raise HTTPException(status_code=422, detail="Нет полей для обновления")
+
+            allowed_fields = {"status", "progress_percent"}
+            fields_to_update = {k: v for k, v in data.items() if k in allowed_fields}
+
+            if not fields_to_update:
+                raise HTTPException(status_code=422, detail="Нет полей для обновления")
+
+            if fields_to_update.get("status") == "completed":
+                fields_to_update["progress_percent"] = 100
+
+            now = datetime.utcnow()
+            fields_to_update["updated_at"] = now
+
+            await self.pdp_repo.update(goal.id, fields_to_update)
+
+            updated = await self.pdp_repo.get_by_id(goal.id)
+
+            return {
+                "goal_id": str(updated.id),
+                "status": updated.status,
+                "progress_percent": updated.progress_percent,
+                "updated_at": now.isoformat(),
+                "message": "Цель успешно обновлена",
+            }
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception("Ошибка в update_pdp")
+            raise HTTPException(status_code=500, detail="Внутренняя ошибка сервера")
+
+    async def _recalculate_level_progress(self, specialist_id: str) -> None:
+        profile = await self.profile_repo.get_by_id(specialist_id)
+        if not profile:
+            return
+
+        if profile.level == "senior":
+            if profile.level_progress_percent != 100:
+                await self.profile_repo.update(profile.id, {
+                    "level_progress_percent": 100,
+                    "updated_at": datetime.utcnow(),
+                })
+            return
+
+        completed_count = await self.project_repo.get_completed_count(specialist_id)
+        stats = await self.review_repo.get_stats(specialist_id)
+        avg_rating = stats["avg_rating"]
+        unique_reviewers = await self.review_repo.get_unique_reviewer_count(specialist_id)
+
+        if profile.level == "junior":
+            req_projects = 5
+            req_rating = 4.2
+            req_reviewers = 3
+            next_level = "middle"
+        else:
+            req_projects = 10
+            req_rating = 4.5
+            req_reviewers = 5
+            next_level = "senior"
+
+        projects_pct = min(completed_count / req_projects * 100, 100)
+        rating_pct = 100.0 if avg_rating >= req_rating else (avg_rating / req_rating * 100)
+        reviewers_pct = min(unique_reviewers / req_reviewers * 100, 100)
+
+        progress = round((projects_pct + rating_pct + reviewers_pct) / 3)
+
+        now = datetime.utcnow()
+
+        if progress >= 100:
+            await self.profile_repo.update(profile.id, {
+                "level": next_level,
+                "level_progress_percent": 0 if next_level != "senior" else 100,
+                "last_level_reviewed_at": now,
+                "updated_at": now,
+            })
+        else:
+            await self.profile_repo.update(profile.id, {
+                "level_progress_percent": progress,
+                "updated_at": now,
+            })
+
+    async def get_level_progress(self, user_id: str) -> dict:
+        try:
+            profile = await self.profile_repo.get_by_user_id(user_id)
+            if not profile:
+                raise NotFoundError(detail="Профиль специалиста не найден")
+
+            await self._recalculate_level_progress(profile.id)
+
+            profile = await self.profile_repo.get_by_user_id(user_id)
+
+            return {
+                "level": profile.level,
+                "level_progress_percent": profile.level_progress_percent,
+                "last_level_reviewed_at": (
+                    profile.last_level_reviewed_at.isoformat()
+                    if profile.last_level_reviewed_at else None
+                ),
+            }
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception("Ошибка в get_level_progress")
+            raise HTTPException(status_code=500, detail="Внутренняя ошибка сервера")
+
+    async def get_rating(self, user_id: str) -> dict:
+        try:
+            profile = await self.profile_repo.get_by_user_id(user_id)
+            if not profile:
+                raise NotFoundError(detail="Профиль специалиста не найден")
+
+            breakdown = await self.review_repo.get_breakdown(profile.id)
+
+            return {
+                "rating": float(profile.rating),
+                "total_reviews": profile.total_reviews,
+                "breakdown_by_stars": breakdown,
+            }
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception("Ошибка в get_rating")
             raise HTTPException(status_code=500, detail="Внутренняя ошибка сервера")

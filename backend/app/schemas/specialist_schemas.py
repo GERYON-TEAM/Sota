@@ -154,6 +154,78 @@ class UpdateReviewResponse(BaseModel):
     message: str
 
 
+class SkillItem(BaseModel):
+    id: str
+    skill_name: str
+    skill_type: str
+    proficiency: int
+    projects_used: int
+    created_at: str
+    updated_at: Optional[str] = None
+
+
+class SkillsListResponse(BaseModel):
+    skills: List[SkillItem]
+
+
+class SkillInput(BaseModel):
+    skill_name: str = Field(..., max_length=255)
+    skill_type: str = Field(..., pattern="^(hardskill|softskill)$")
+    proficiency: int = Field(..., ge=1, le=5)
+
+
+class SkillsUpdateRequest(BaseModel):
+    skills: List[SkillInput]
+
+
+class SkillsUpdateResponse(BaseModel):
+    skills: List[SkillItem]
+    updated_at: str
+    message: str
+
+
+class PdpGoalItem(BaseModel):
+    id: str
+    goal_title: str
+    goal_description: Optional[str] = None
+    status: str
+    progress_percent: int
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    created_at: str
+    updated_at: Optional[str] = None
+
+
+class PdpListResponse(BaseModel):
+    goals: List[PdpGoalItem]
+
+
+class PdpUpdateRequest(BaseModel):
+    goal_id: str
+    status: Optional[str] = Field(None, pattern="^(in_progress|completed|archived)$")
+    progress_percent: Optional[int] = Field(None, ge=0, le=100)
+
+
+class PdpUpdateResponse(BaseModel):
+    goal_id: str
+    status: str
+    progress_percent: int
+    updated_at: str
+    message: str
+
+
+class LevelProgressResponse(BaseModel):
+    level: str
+    level_progress_percent: int
+    last_level_reviewed_at: Optional[str] = None
+
+
+class RatingResponse(BaseModel):
+    rating: float
+    total_reviews: int
+    breakdown_by_stars: Optional[dict] = None
+
+
 class ProfileResponse(BaseModel):
     id: str
     level: str

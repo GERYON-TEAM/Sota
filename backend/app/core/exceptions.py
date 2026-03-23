@@ -24,3 +24,13 @@ class ForbiddenError(HTTPException):
 class ConflictError(HTTPException):
     def __init__(self, detail: str = "Конфликт состояний"):
         super().__init__(status_code=409, detail=detail)
+
+
+class GoneError(HTTPException):
+    def __init__(self, detail: str = "Ресурс более недоступен"):
+        super().__init__(status_code=410, detail=detail)
+
+
+class LockedError(HTTPException):
+    def __init__(self, detail: str = "Ресурс заблокирован"):
+        super().__init__(status_code=423, detail=detail)

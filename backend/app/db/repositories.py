@@ -1,10 +1,13 @@
 from typing import Optional, List
-from sqlalchemy import select, func
+from datetime import datetime
+from sqlalchemy import select, func, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.repository import BaseRepository
 from app.db.models import (
     User, SpecialistProfile, SpecialistInvitation,
     SpecialistProjectHistory, SpecialistReview, Project,
+    SpecialistSkill, SpecialistPdp, ProjectRequiredSkill,
+    Session, AuditLog, Role, Permission, LoginAttempt, TwoFactorBackupCode,
 )
 
 
@@ -16,6 +19,150 @@ class UserRepository(BaseRepository):
         query = select(self.model).where(self.model.email == email)
         result = await self.db.execute(query)
         return result.scalars().first()
+
+    async def get_by_verification_token(self, token: str) -> Optional[User]:
+        query = select(self.model).where(self.model.email_verification_token == token)
+        result = await self.db.execute(query)
+        return result.scalars().first()
+
+
+class SessionRepository(BaseRepository):
+    def __init__(self, db: AsyncSession):
+        super().__init__(db, Session)
+
+    async def get_by_refresh_token(self, refresh_token: str) -> Optional[Session]:
+        query = select(self.model).where(
+            self.model.refresh_token == refresh_token,
+            self.model.is_active == True,
+        )
+        result = await self.db.execute(query)
+        return result.scalars().first()
+
+    async def get_by_access_token(self, access_token: str) -> Optional[Session]:
+        query = select(self.model).where(
+            self.model.access_token == access_token,
+            self.model.is_active == True,
+        )
+        result = await self.db.execute(query)
+        return result.scalars().first()
+
+    async def get_active_by_user(self, user_id: str) -> List:
+        query = (
+            select(self.model)
+            .where(self.model.user_id == user_id, self.model.is_active == True)
+            .order_by(self.model.created_at.desc())
+        )
+        result = await self.db.execute(query)
+        return result.scalars().all()
+
+    async def deactivate(self, session_id: str) -> None:
+        query = (
+            update(self.model)
+            .where(self.model.id == session_id)
+            .values(is_active=False)
+        )
+        await self.db.execute(query)
+        await self.db.commit()
+
+    async def deactivate_all_by_user(self, user_id: str) -> int:
+        query = (
+            update(self.model)
+            .where(self.model.user_id == user_id, self.model.is_active == True)
+            .values(is_active=False)
+        )
+        result = await self.db.execute(query)
+        await self.db.commit()
+        return result.rowcount
+
+
+class AuditLogRepository(BaseRepository):
+    def __init__(self, db: AsyncSession):
+        super().__init__(db, AuditLog)
+
+    async def get_by_user(self, user_id: str, action: Optional[str], page: int, limit: int) -> dict:
+        base = select(self.model).where(self.model.user_id == user_id)
+        if action:
+            base = base.where(self.model.action == action)
+
+        count_query = select(func.count()).select_from(base.subquery())
+        count_result = await self.db.execute(count_query)
+        total = count_result.scalar()
+
+        offset = (page - 1) * limit
+        items_query = base.order_by(self.model.created_at.desc()).offset(offset).limit(limit)
+        items_result = await self.db.execute(items_query)
+        items = items_result.scalars().all()
+
+        return {"items": items, "total": total}
+
+    async def count_by_entity(self, entity_id: str, action: str) -> int:
+        query = select(func.count(self.model.id)).where(
+            self.model.entity_id == entity_id,
+            self.model.action == action,
+        )
+        result = await self.db.execute(query)
+        return result.scalar()
+
+
+class RoleRepository(BaseRepository):
+    def __init__(self, db: AsyncSession):
+        super().__init__(db, Role)
+
+    async def get_by_name(self, name: str) -> Optional[Role]:
+        query = select(self.model).where(self.model.name == name)
+        result = await self.db.execute(query)
+        return result.scalars().first()
+
+
+class PermissionRepository(BaseRepository):
+    def __init__(self, db: AsyncSession):
+        super().__init__(db, Permission)
+
+    async def get_by_role(self, role_id: str) -> List:
+        query = select(self.model).where(self.model.role_id == role_id)
+        result = await self.db.execute(query)
+        return result.scalars().all()
+
+    async def check_permission(self, role_id: str, resource: str, action: str) -> bool:
+        query = select(self.model).where(
+            self.model.role_id == role_id,
+            self.model.resource == resource,
+            self.model.action == action,
+            self.model.can_perform == True,
+        )
+        result = await self.db.execute(query)
+        return result.scalars().first() is not None
+
+
+class LoginAttemptRepository(BaseRepository):
+    def __init__(self, db: AsyncSession):
+        super().__init__(db, LoginAttempt)
+
+    async def get_recent_failed(self, email: str, since: datetime) -> int:
+        query = select(func.count(self.model.id)).where(
+            self.model.email == email,
+            self.model.success == False,
+            self.model.created_at >= since,
+        )
+        result = await self.db.execute(query)
+        return result.scalar()
+
+
+class TwoFactorBackupCodeRepository(BaseRepository):
+    def __init__(self, db: AsyncSession):
+        super().__init__(db, TwoFactorBackupCode)
+
+    async def get_unused_by_user(self, user_id: str) -> List:
+        query = select(self.model).where(
+            self.model.user_id == user_id,
+            self.model.is_used == False,
+        )
+        result = await self.db.execute(query)
+        return result.scalars().all()
+
+    async def delete_by_user(self, user_id: str) -> None:
+        query = delete(self.model).where(self.model.user_id == user_id)
+        await self.db.execute(query)
 
 
 class SpecialistProfileRepository(BaseRepository):
@@ -69,6 +216,20 @@ class SpecialistInvitationRepository(BaseRepository):
         result = await self.db.execute(query)
         return result.scalars().first()
 
+    async def mark_expired(self, specialist_id: str) -> int:
+        query = (
+            update(self.model)
+            .where(
+                self.model.specialist_id == specialist_id,
+                self.model.status == "pending",
+                self.model.expires_at < datetime.utcnow(),
+            )
+            .values(status="expired", updated_at=datetime.utcnow())
+        )
+        result = await self.db.execute(query)
+        await self.db.commit()
+        return result.rowcount
+
 
 class SpecialistProjectHistoryRepository(BaseRepository):
     def __init__(self, db: AsyncSession):
@@ -78,6 +239,14 @@ class SpecialistProjectHistoryRepository(BaseRepository):
         query = select(func.count(self.model.id)).where(
             self.model.specialist_id == specialist_id,
             self.model.status == "in_progress",
+        )
+        result = await self.db.execute(query)
+        return result.scalar()
+
+    async def get_completed_count(self, specialist_id: str) -> int:
+        query = select(func.count(self.model.id)).where(
+            self.model.specialist_id == specialist_id,
+            self.model.status == "completed",
         )
         result = await self.db.execute(query)
         return result.scalar()
@@ -162,3 +331,85 @@ class SpecialistReviewRepository(BaseRepository):
         result = await self.db.execute(query)
         row = result.first()
         return {"total": row.total, "avg_rating": float(row.avg_rating) if row.avg_rating else 0.0}
+
+    async def get_unique_reviewer_count(self, specialist_id: str) -> int:
+        query = select(func.count(func.distinct(self.model.reviewer_id))).where(
+            self.model.specialist_id == specialist_id
+        )
+        result = await self.db.execute(query)
+        return result.scalar()
+
+    async def get_breakdown(self, specialist_id: str) -> dict:
+        query = (
+            select(self.model.rating, func.count(self.model.id))
+            .where(self.model.specialist_id == specialist_id)
+            .group_by(self.model.rating)
+        )
+        result = await self.db.execute(query)
+        breakdown = {str(i): 0 for i in range(1, 6)}
+        for rating, count in result.all():
+            breakdown[str(rating)] = count
+        return breakdown
+
+
+class SpecialistSkillRepository(BaseRepository):
+    def __init__(self, db: AsyncSession):
+        super().__init__(db, SpecialistSkill)
+
+    async def get_by_specialist_id(self, specialist_id: str) -> List:
+        query = (
+            select(self.model)
+            .where(self.model.specialist_id == specialist_id)
+            .order_by(self.model.created_at.desc())
+        )
+        result = await self.db.execute(query)
+        return result.scalars().all()
+
+    async def delete_by_specialist_id(self, specialist_id: str) -> None:
+        query = delete(self.model).where(self.model.specialist_id == specialist_id)
+        await self.db.execute(query)
+
+    async def bulk_create(self, items: list) -> List:
+        objects = [self.model(**data) for data in items]
+        self.db.add_all(objects)
+        await self.db.flush()
+        for obj in objects:
+            await self.db.refresh(obj)
+        return objects
+
+
+class SpecialistPdpRepository(BaseRepository):
+    def __init__(self, db: AsyncSession):
+        super().__init__(db, SpecialistPdp)
+
+    async def get_by_specialist_id(self, specialist_id: str) -> List:
+        query = (
+            select(self.model)
+            .where(self.model.specialist_id == specialist_id)
+            .order_by(self.model.created_at.desc())
+        )
+        result = await self.db.execute(query)
+        return result.scalars().all()
+
+    async def get_by_id_and_specialist(self, goal_id: str, specialist_id: str):
+        query = select(self.model).where(
+            self.model.id == goal_id,
+            self.model.specialist_id == specialist_id,
+        )
+        result = await self.db.execute(query)
+        return result.scalars().first()
+
+
+class ProjectRepository(BaseRepository):
+    def __init__(self, db: AsyncSession):
+        super().__init__(db, Project)
+
+
+class ProjectRequiredSkillRepository(BaseRepository):
+    def __init__(self, db: AsyncSession):
+        super().__init__(db, ProjectRequiredSkill)
+
+    async def get_by_project_id(self, project_id: str) -> List:
+        query = select(self.model).where(self.model.project_id == project_id)
+        result = await self.db.execute(query)
+        return result.scalars().all()

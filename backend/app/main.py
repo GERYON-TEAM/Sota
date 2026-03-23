@@ -8,7 +8,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.db.models import Base
 from app.db.session import engine, async_session
-from app.api.routers import auth, specialists
+from app.api.routers import auth, specialists, projects
 from app.core.limiter import limiter
 
 logger = logging.getLogger(__name__)
@@ -43,6 +43,7 @@ app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(specialists.router, prefix="/api/specialists", tags=["specialists"])
+app.include_router(projects.router, prefix="/api/projects", tags=["projects"])
 
 
 @app.get("/health")
