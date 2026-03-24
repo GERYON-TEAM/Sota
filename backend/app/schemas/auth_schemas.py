@@ -36,6 +36,34 @@ class ProfileUpdateRequest(BaseModel):
     middle_name: Optional[str] = None
 
 
+class Enable2FARequest(BaseModel):
+    password: str
+
+
+class Confirm2FARequest(BaseModel):
+    code: str
+
+
+class Disable2FARequest(BaseModel):
+    password: str
+
+
+class ChangeRoleRequest(BaseModel):
+    role: str
+    level: Optional[str] = None
+
+
+class ChangeStatusRequest(BaseModel):
+    status: str
+    reason: Optional[str] = None
+
+
+class ChangePasswordRequest(BaseModel):
+    old_password: Optional[str] = None
+    new_password: str
+    reset_token: Optional[str] = None
+
+
 class RefreshRequest(BaseModel):
     refresh_token: str
 

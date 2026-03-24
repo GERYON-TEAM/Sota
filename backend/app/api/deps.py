@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError
@@ -12,6 +13,7 @@ from app.services.specialist_service import SpecialistService
 from app.services.project_service import ProjectService
 
 oauth2_scheme = HTTPBearer()
+oauth2_scheme_optional = HTTPBearer(auto_error=False)
 
 
 async def get_db() -> AsyncSession:
@@ -29,6 +31,31 @@ async def get_current_user(
         user_id = payload.get("sub")
         token_type = payload.get("type")
 
+        if not user_id or token_type != "access":
+            raise JWTError()
+    except JWTError:
+        raise AuthenticationError(detail="Невалидный токен")
+
+    user_repo = UserRepository(db)
+    user = await user_repo.get_by_id(user_id)
+
+    if not user or user.status != "active":
+        raise AuthenticationError(detail="Пользователь не найден или неактивен")
+
+    return user
+
+
+async def get_optional_current_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(oauth2_scheme_optional),
+    db: AsyncSession = Depends(get_db),
+) -> Optional[User]:
+    if not credentials:
+        return None
+    token = credentials.credentials
+    try:
+        payload = decode_token(token)
+        user_id = payload.get("sub")
+        token_type = payload.get("type")
         if not user_id or token_type != "access":
             raise JWTError()
     except JWTError:

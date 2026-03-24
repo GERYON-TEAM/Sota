@@ -1,9 +1,16 @@
 import re
+import io
+import json
 import uuid
+import base64
+import secrets
+import string
 import logging
 from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 import pyotp
+import qrcode
+from app.core.redis import redis_client
 from app.db.repositories import (
     UserRepository, SpecialistProfileRepository,
     AuditLogRepository, SessionRepository, LoginAttemptRepository,
@@ -39,20 +46,7 @@ class AuthService:
         if not re.match(r"[^@]+@[^@]+\.[^@]+", data.email):
             raise AlreadyExistsError(detail="Некорректный email")
 
-        if len(data.password) < 8:
-            raise AlreadyExistsError(detail="Пароль должен быть минимум 8 символов")
-
-        if len(data.password) > 128:
-            raise AlreadyExistsError(detail="Пароль слишком длинный")
-
-        if not re.search(r"[A-Z]", data.password):
-            raise AlreadyExistsError(detail="Пароль должен содержать хотя бы одну заглавную букву")
-
-        if not re.search(r"[0-9]", data.password):
-            raise AlreadyExistsError(detail="Пароль должен содержать хотя бы одну цифру")
-
-        if not re.search(r"[^A-Za-z0-9]", data.password):
-            raise AlreadyExistsError(detail="Пароль должен содержать хотя бы один спецсимвол")
+        self._validate_password(data.password)
 
         if data.role not in ["customer", "specialist", "validator"]:
             raise AlreadyExistsError(detail="Роль должна быть customer, specialist или validator")
@@ -149,7 +143,7 @@ class AuthService:
             raise LockedError(detail="Аккаунт временно заблокирован")
 
         if not verify_password(password, user.password_hash):
-            await self._handle_failed_login(user, email, ip_address)
+            await self._handle_failed_login(user, email, ip_address, user_agent)
             raise AuthenticationError(detail="Неверный email или пароль")
 
         await self.user_repo.update(user.id, {
@@ -167,7 +161,7 @@ class AuthService:
                 "user_id": user.id,
                 "device_info": user_agent,
                 "ip_address": ip_address,
-                "expires_at": datetime.utcnow() + timedelta(minutes=10),
+                "expires_at": datetime.utcnow() + timedelta(minutes=5),
                 "is_active": False,
             })
 
@@ -176,6 +170,7 @@ class AuthService:
                 "user_email": user.email,
                 "action": "login_2fa_pending",
                 "ip_address": ip_address,
+                "details": json.dumps({"user_agent": user_agent}),
             })
 
             return {
@@ -211,6 +206,7 @@ class AuthService:
             "user_email": user.email,
             "action": "login_success",
             "ip_address": ip_address,
+            "details": json.dumps({"user_agent": user_agent}),
         })
 
         return {
@@ -222,7 +218,7 @@ class AuthService:
             "user": user,
         }
 
-    async def verify_2fa(self, session_id: str, code: str, ip_address: str = None):
+    async def verify_2fa(self, session_id: str, code: str, ip_address: str = None, user_agent: str = None):
         session = await self.session_repo.get_by_id(session_id)
         if not session:
             raise NotFoundError(detail="Временная сессия не найдена")
@@ -264,6 +260,7 @@ class AuthService:
                 "entity_id": session_id,
                 "entity_type": "session",
                 "ip_address": ip_address,
+                "details": json.dumps({"user_agent": user_agent}),
             })
             raise AuthenticationError(detail="Неверный код 2FA")
 
@@ -293,6 +290,7 @@ class AuthService:
             "entity_id": session_id,
             "entity_type": "session",
             "ip_address": ip_address,
+            "details": json.dumps({"user_agent": user_agent}),
         })
 
         return {
@@ -302,7 +300,7 @@ class AuthService:
             "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         }
 
-    async def logout(self, user, access_token: str, ip_address: str = None):
+    async def logout(self, user, access_token: str, ip_address: str = None, user_agent: str = None):
         session = await self.session_repo.get_by_access_token(access_token)
         if not session:
             raise NotFoundError(detail="Сессия не найдена")
@@ -319,6 +317,7 @@ class AuthService:
             "entity_id": session.id,
             "entity_type": "session",
             "ip_address": ip_address,
+            "details": json.dumps({"user_agent": user_agent}),
         })
 
     async def refresh(self, refresh_token: str, ip_address: str = None):
@@ -451,6 +450,418 @@ class AuthService:
             "ip_address": ip_address,
         })
 
+    async def enable_2fa(self, user, password: str, ip_address: str = None):
+        if user.two_factor_enabled:
+            raise ConflictError(detail="2FA уже включена")
+
+        if not verify_password(password, user.password_hash):
+            raise AuthenticationError(detail="Неверный пароль")
+
+        secret = pyotp.random_base32()
+        totp = pyotp.TOTP(secret)
+        uri = totp.provisioning_uri(user.email, issuer_name="Sota")
+
+        qr = qrcode.make(uri)
+        buffer = io.BytesIO()
+        qr.save(buffer, format="PNG")
+        qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+        qr_code_url = f"data:image/png;base64,{qr_base64}"
+
+        backup_codes = []
+        backup_code_hashes = []
+        for _ in range(5):
+            part1 = "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(4))
+            part2 = "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(4))
+            code = f"{part1}-{part2}"
+            backup_codes.append(code)
+            backup_code_hashes.append(hash_password(code))
+
+        await redis_client.setex(
+            f"2fa_setup:{user.id}",
+            600,
+            json.dumps({"secret": secret, "backup_codes": backup_codes, "backup_code_hashes": backup_code_hashes}),
+        )
+
+        await self.audit_repo.create({
+            "user_id": user.id,
+            "user_email": user.email,
+            "action": "2fa_enable_start",
+            "ip_address": ip_address,
+        })
+
+        return {
+            "secret": secret,
+            "qr_code_url": qr_code_url,
+            "backup_codes": backup_codes,
+        }
+
+    async def confirm_2fa(self, user, code: str, ip_address: str = None):
+        if user.two_factor_enabled:
+            raise ConflictError(detail="2FA уже включена")
+
+        raw = await redis_client.get(f"2fa_setup:{user.id}")
+        if not raw:
+            raise GoneError(detail="Процесс включения 2FA не найден или истёк")
+
+        setup_data = json.loads(raw)
+        secret = setup_data["secret"]
+
+        totp = pyotp.TOTP(secret)
+        if not totp.verify(code, valid_window=1):
+            raise ForbiddenError(detail="Неверный код 2FA")
+
+        await self.user_repo.update(user.id, {
+            "two_factor_enabled": True,
+            "two_factor_secret": secret,
+            "updated_at": datetime.utcnow(),
+        })
+
+        await self.backup_code_repo.delete_by_user(user.id)
+        for code_hash in setup_data["backup_code_hashes"]:
+            await self.backup_code_repo.create({
+                "user_id": user.id,
+                "code_hash": code_hash,
+            })
+
+        await redis_client.delete(f"2fa_setup:{user.id}")
+
+        await self.audit_repo.create({
+            "user_id": user.id,
+            "user_email": user.email,
+            "action": "2fa_enabled",
+            "ip_address": ip_address,
+        })
+
+        return {
+            "message": "Двухфакторная аутентификация включена",
+            "backup_codes": setup_data["backup_codes"],
+        }
+
+    async def get_audit_log(self, user_id=None, action=None, entity_type=None, from_date=None, to_date=None, limit=100, offset=0):
+        result = await self.audit_repo.get_audit_log(
+            user_id, action, entity_type, from_date, to_date, limit, offset,
+        )
+
+        logs = []
+        for entry in result["items"]:
+            logs.append({
+                "id": entry.id,
+                "user_id": entry.user_id,
+                "user_email": entry.user_email,
+                "action": entry.action,
+                "entity_type": entry.entity_type,
+                "entity_id": entry.entity_id,
+                "ip_address": entry.ip_address,
+                "created_at": entry.created_at.isoformat() if entry.created_at else None,
+                "details": self._parse_details(entry.details),
+            })
+
+        return {
+            "logs": logs,
+            "total": result["total"],
+            "limit": limit,
+            "offset": offset,
+        }
+
+    async def change_user_status(self, admin_user, target_user_id: str, data, ip_address: str = None):
+        if data.status not in ["active", "blocked"]:
+            raise AlreadyExistsError(detail="Статус должен быть active или blocked")
+
+        target = await self.user_repo.get_by_id(target_user_id)
+        if not target:
+            raise NotFoundError(detail="Пользователь не найден")
+
+        if target.role == "admin":
+            raise ConflictError(detail="Нельзя изменить статус администратора")
+
+        if data.status == "blocked":
+            await self.session_repo.deactivate_all_by_user(target.id)
+
+        await self.user_repo.update(target.id, {
+            "status": data.status,
+            "updated_at": datetime.utcnow(),
+        })
+
+        await self.audit_repo.create({
+            "user_id": admin_user.id,
+            "user_email": admin_user.email,
+            "action": "account_blocked" if data.status == "blocked" else "account_unblocked",
+            "entity_id": target.id,
+            "entity_type": "user",
+            "details": json.dumps({"reason": data.reason, "new_status": data.status}) if data.reason else None,
+            "ip_address": ip_address,
+        })
+
+        return {
+            "message": "Статус пользователя обновлен",
+            "user_id": str(target.id),
+            "status": data.status,
+        }
+
+    async def change_user_role(self, admin_user, target_user_id: str, data, ip_address: str = None):
+        target = await self.user_repo.get_by_id(target_user_id)
+        if not target:
+            raise NotFoundError(detail="Пользователь не найден")
+
+        if data.role not in ["customer", "specialist", "validator"]:
+            raise AlreadyExistsError(detail="Роль должна быть customer, specialist или validator")
+
+        if data.role == "specialist":
+            if not data.level:
+                raise AlreadyExistsError(detail="Для роли specialist необходимо указать level")
+            if data.level not in ["junior", "middle", "senior"]:
+                raise AlreadyExistsError(detail="Уровень должен быть junior, middle или senior")
+        else:
+            if data.level:
+                raise ConflictError(detail="Уровень указывается только для роли specialist")
+
+        old_role = target.role
+        old_level = target.level
+        new_level = data.level if data.role == "specialist" else None
+
+        await self.user_repo.update(target.id, {
+            "role": data.role,
+            "level": new_level,
+            "updated_at": datetime.utcnow(),
+        })
+
+        if data.role == "specialist":
+            existing_profile = await self.profile_repo.get_by_user_id(target.id)
+            if not existing_profile:
+                await self.profile_repo.create({
+                    "user_id": target.id,
+                    "level": new_level,
+                })
+
+        await self.audit_repo.create({
+            "user_id": admin_user.id,
+            "user_email": admin_user.email,
+            "action": "role_change",
+            "entity_id": target.id,
+            "entity_type": "user",
+            "ip_address": ip_address,
+            "details": json.dumps({
+                "old_role": old_role,
+                "new_role": data.role,
+                "old_level": old_level,
+                "new_level": new_level,
+                "changed_by": str(admin_user.id),
+            }),
+        })
+
+        return {
+            "message": "Роль обновлена",
+            "user_id": str(target.id),
+            "old_role": old_role,
+            "new_role": data.role,
+            "old_level": old_level,
+            "new_level": new_level,
+        }
+
+    async def get_user_by_id(self, user_id: str):
+        user = await self.user_repo.get_by_id(user_id)
+        if not user:
+            raise NotFoundError(detail="Пользователь не найден")
+
+        active_sessions = await self.session_repo.get_active_by_user(user.id)
+
+        return {
+            "id": str(user.id),
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "middle_name": user.middle_name,
+            "role": user.role,
+            "level": user.level,
+            "status": user.status,
+            "email_verified": user.email_verified,
+            "two_factor_enabled": user.two_factor_enabled,
+            "failed_login_attempts": user.failed_login_attempts,
+            "locked_until": user.locked_until.isoformat() if user.locked_until else None,
+            "last_login_at": user.last_login_at.isoformat() if user.last_login_at else None,
+            "created_at": user.created_at.isoformat() if user.created_at else None,
+            "updated_at": user.updated_at.isoformat() if user.updated_at else None,
+            "active_sessions_count": len(active_sessions),
+        }
+
+    async def get_users(self, role: str = None, status: str = None, search: str = None, limit: int = 50, offset: int = 0):
+        result = await self.user_repo.get_list(role, status, search, limit, offset)
+
+        users = []
+        for u in result["items"]:
+            users.append({
+                "id": str(u.id),
+                "email": u.email,
+                "first_name": u.first_name,
+                "last_name": u.last_name,
+                "role": u.role,
+                "status": u.status,
+                "email_verified": u.email_verified,
+                "created_at": u.created_at.isoformat() if u.created_at else None,
+            })
+
+        return {
+            "users": users,
+            "total": result["total"],
+            "limit": limit,
+            "offset": offset,
+        }
+
+    async def check_permission(self, user, resource: str, action: str):
+        role = await self.role_repo.get_by_name(user.role)
+        allowed = False
+        if role:
+            allowed = await self.permission_repo.check_permission(role.id, resource, action)
+
+        return {
+            "allowed": allowed,
+            "resource": resource,
+            "action": action,
+        }
+
+    async def disable_2fa(self, user, password: str, ip_address: str = None):
+        if not user.two_factor_enabled:
+            raise ConflictError(detail="2FA уже отключена")
+
+        if not verify_password(password, user.password_hash):
+            raise ForbiddenError(detail="Неверный пароль")
+
+        await self.user_repo.update(user.id, {
+            "two_factor_enabled": False,
+            "two_factor_secret": None,
+            "updated_at": datetime.utcnow(),
+        })
+
+        await self.backup_code_repo.delete_by_user(user.id)
+
+        await self.audit_repo.create({
+            "user_id": user.id,
+            "user_email": user.email,
+            "action": "2fa_disabled",
+            "ip_address": ip_address,
+        })
+
+    async def get_login_history(self, user, action: str = None, from_date=None, to_date=None, limit: int = 50, offset: int = 0):
+        result = await self.audit_repo.get_login_history(
+            user.id, action, from_date, to_date, limit, offset,
+        )
+
+        history = []
+        for entry in result["items"]:
+            details_parsed = self._parse_details(entry.details)
+            user_agent = details_parsed.get("user_agent") if isinstance(details_parsed, dict) else None
+            history.append({
+                "id": entry.id,
+                "action": entry.action,
+                "ip_address": entry.ip_address,
+                "user_agent": user_agent,
+                "created_at": entry.created_at.isoformat() if entry.created_at else None,
+                "details": details_parsed,
+            })
+
+        return {
+            "history": history,
+            "total": result["total"],
+            "limit": limit,
+            "offset": offset,
+        }
+
+    async def get_sessions(self, user, access_token: str, limit: int = 20, offset: int = 0):
+        result = await self.session_repo.get_active_by_user_paginated(user.id, limit, offset)
+
+        sessions = []
+        for s in result["items"]:
+            sessions.append({
+                "id": s.id,
+                "device_info": s.device_info,
+                "session_name": s.session_name,
+                "ip_address": s.ip_address,
+                "created_at": s.created_at.isoformat() if s.created_at else None,
+                "last_activity_at": s.last_activity_at.isoformat() if s.last_activity_at else None,
+                "is_current": s.access_token == access_token,
+            })
+
+        return {"sessions": sessions, "total": result["total"]}
+
+    async def delete_session(self, user, session_id: str, access_token: str, ip_address: str = None):
+        session = await self.session_repo.get_by_id(session_id)
+        if not session:
+            raise NotFoundError(detail="Сессия не найдена")
+
+        if session.user_id != user.id:
+            raise ForbiddenError(detail="Нельзя завершить чужую сессию")
+
+        await self.session_repo.update(session.id, {
+            "is_active": False,
+            "refresh_token": None,
+        })
+
+        await self.audit_repo.create({
+            "user_id": user.id,
+            "user_email": user.email,
+            "action": "session_terminated",
+            "entity_id": session.id,
+            "entity_type": "session",
+            "ip_address": ip_address,
+        })
+
+    async def change_password(self, user, data, ip_address: str = None):
+        if data.reset_token:
+            target_user = await self.user_repo.get_by_reset_token(data.reset_token)
+            if not target_user:
+                raise AuthenticationError(detail="Невалидный токен восстановления")
+
+            if target_user.password_reset_expires_at and target_user.password_reset_expires_at < datetime.utcnow():
+                raise GoneError(detail="Токен восстановления истёк")
+
+            if target_user.status == "blocked":
+                raise ForbiddenError(detail="Аккаунт заблокирован")
+
+            self._validate_password(data.new_password)
+
+            await self.user_repo.update(target_user.id, {
+                "password_hash": hash_password(data.new_password),
+                "password_reset_token": None,
+                "password_reset_expires_at": None,
+                "failed_login_attempts": 0,
+                "updated_at": datetime.utcnow(),
+            })
+
+            await self.audit_repo.create({
+                "user_id": target_user.id,
+                "user_email": target_user.email,
+                "action": "password_change",
+                "ip_address": ip_address,
+            })
+            return
+
+        if not user:
+            raise AuthenticationError(detail="Требуется авторизация или токен восстановления")
+
+        if not data.old_password:
+            raise AlreadyExistsError(detail="Укажите текущий пароль")
+
+        if user.status == "blocked":
+            raise ForbiddenError(detail="Аккаунт заблокирован")
+
+        if not verify_password(data.old_password, user.password_hash):
+            raise AuthenticationError(detail="Неверный текущий пароль")
+
+        self._validate_password(data.new_password)
+
+        await self.user_repo.update(user.id, {
+            "password_hash": hash_password(data.new_password),
+            "failed_login_attempts": 0,
+            "updated_at": datetime.utcnow(),
+        })
+
+        await self.audit_repo.create({
+            "user_id": user.id,
+            "user_email": user.email,
+            "action": "password_change",
+            "ip_address": ip_address,
+        })
+
     async def password_reset_request(self, email: str, ip_address: str = None):
         user = await self.user_repo.get_by_email(email)
         if not user:
@@ -473,7 +884,7 @@ class AuthService:
             "ip_address": ip_address,
         })
 
-    async def _handle_failed_login(self, user, email: str, ip_address: str = None):
+    async def _handle_failed_login(self, user, email: str, ip_address: str = None, user_agent: str = None):
         attempts = (user.failed_login_attempts or 0) + 1
         update_data = {
             "failed_login_attempts": attempts,
@@ -492,7 +903,28 @@ class AuthService:
             "user_email": email,
             "action": "login_failed",
             "ip_address": ip_address,
+            "details": json.dumps({"user_agent": user_agent}),
         })
+
+    def _parse_details(self, details_str):
+        if not details_str:
+            return None
+        try:
+            return json.loads(details_str)
+        except (json.JSONDecodeError, TypeError):
+            return details_str
+
+    def _validate_password(self, password: str):
+        if len(password) < 8:
+            raise AlreadyExistsError(detail="Пароль должен быть минимум 8 символов")
+        if len(password) > 128:
+            raise AlreadyExistsError(detail="Пароль слишком длинный")
+        if not re.search(r"[A-Z]", password):
+            raise AlreadyExistsError(detail="Пароль должен содержать хотя бы одну заглавную букву")
+        if not re.search(r"[0-9]", password):
+            raise AlreadyExistsError(detail="Пароль должен содержать хотя бы одну цифру")
+        if not re.search(r"[^A-Za-z0-9]", password):
+            raise AlreadyExistsError(detail="Пароль должен содержать хотя бы один спецсимвол")
 
     async def _log_login_attempt(self, email: str, ip_address: str, success: bool, reason_failure: str = None):
         await self.login_attempt_repo.create({

@@ -1,18 +1,23 @@
+from typing import Optional
+from datetime import datetime
 from fastapi import APIRouter, Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials
 from app.schemas.auth_schemas import (
     RegisterRequest, VerifyEmailRequest, Verify2FARequest,
     ChangeEmailRequest, ProfileUpdateRequest, PasswordResetRequest,
+    ChangePasswordRequest, Enable2FARequest, Confirm2FARequest, Disable2FARequest,
     RefreshRequest, LoginRequest,
 )
-from app.api.deps import get_auth_service, get_current_user, oauth2_scheme
+from app.api.deps import get_auth_service, get_current_user, get_optional_current_user, oauth2_scheme
 from app.services.auth_service import AuthService
 from app.db.models import User
+from app.core.limiter import limiter
 
 router = APIRouter()
 
 
 @router.post("/register", status_code=201)
+@limiter.limit("5/minute")
 async def register(
     body: RegisterRequest,
     request: Request,
@@ -40,6 +45,7 @@ async def verify_email(
 
 
 @router.post("/2fa/verify")
+@limiter.limit("5/minute")
 async def verify_2fa(
     body: Verify2FARequest,
     request: Request,
@@ -49,6 +55,7 @@ async def verify_2fa(
         body.session_id,
         body.code,
         ip_address=request.client.host if request.client else None,
+        user_agent=request.headers.get("user-agent"),
     )
     return result
 
@@ -64,6 +71,7 @@ async def logout(
         user,
         credentials.credentials,
         ip_address=request.client.host if request.client else None,
+        user_agent=request.headers.get("user-agent"),
     )
     return {"message": "Выход выполнен успешно"}
 
@@ -82,6 +90,7 @@ async def refresh(
 
 
 @router.post("/password-reset-request")
+@limiter.limit("3/minute")
 async def password_reset_request(
     body: PasswordResetRequest,
     request: Request,
@@ -118,6 +127,7 @@ async def update_profile(
 
 
 @router.post("/change-email")
+@limiter.limit("3/minute")
 async def change_email(
     body: ChangeEmailRequest,
     request: Request,
@@ -136,7 +146,136 @@ async def change_email(
     }
 
 
+@router.get("/check-permission")
+async def check_permission(
+    resource: str,
+    action: str,
+    user: User = Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    return await auth_service.check_permission(user, resource, action)
+
+
+@router.post("/2fa/enable")
+@limiter.limit("5/minute")
+async def enable_2fa(
+    body: Enable2FARequest,
+    request: Request,
+    user: User = Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    return await auth_service.enable_2fa(
+        user,
+        body.password,
+        ip_address=request.client.host if request.client else None,
+    )
+
+
+@router.post("/2fa/confirm")
+@limiter.limit("5/minute")
+async def confirm_2fa(
+    body: Confirm2FARequest,
+    request: Request,
+    user: User = Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    return await auth_service.confirm_2fa(
+        user,
+        body.code,
+        ip_address=request.client.host if request.client else None,
+    )
+
+
+@router.post("/2fa/disable")
+@limiter.limit("5/minute")
+async def disable_2fa(
+    body: Disable2FARequest,
+    request: Request,
+    user: User = Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    await auth_service.disable_2fa(
+        user,
+        body.password,
+        ip_address=request.client.host if request.client else None,
+    )
+    return {"message": "Двухфакторная аутентификация отключена"}
+
+
+@router.get("/login-history")
+async def get_login_history(
+    action: Optional[str] = None,
+    from_date: Optional[str] = None,
+    to_date: Optional[str] = None,
+    limit: int = 50,
+    offset: int = 0,
+    user: User = Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    parsed_from = datetime.fromisoformat(from_date) if from_date else None
+    parsed_to = datetime.fromisoformat(to_date) if to_date else None
+
+    return await auth_service.get_login_history(
+        user,
+        action=action,
+        from_date=parsed_from,
+        to_date=parsed_to,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@router.get("/sessions")
+async def get_sessions(
+    limit: int = 20,
+    offset: int = 0,
+    user: User = Depends(get_current_user),
+    credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    return await auth_service.get_sessions(
+        user,
+        credentials.credentials,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@router.delete("/sessions/{session_id}")
+async def delete_session(
+    session_id: str,
+    request: Request,
+    user: User = Depends(get_current_user),
+    credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme),
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    await auth_service.delete_session(
+        user,
+        session_id,
+        credentials.credentials,
+        ip_address=request.client.host if request.client else None,
+    )
+    return {"message": "Сессия завершена"}
+
+
+@router.post("/change-password")
+@limiter.limit("5/minute")
+async def change_password(
+    body: ChangePasswordRequest,
+    request: Request,
+    user: Optional[User] = Depends(get_optional_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    await auth_service.change_password(
+        user,
+        body,
+        ip_address=request.client.host if request.client else None,
+    )
+    return {"message": "Пароль успешно изменен"}
+
+
 @router.post("/login")
+@limiter.limit("10/minute")
 async def login(
     body: LoginRequest,
     request: Request,

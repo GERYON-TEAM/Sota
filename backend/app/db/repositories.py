@@ -25,6 +25,42 @@ class UserRepository(BaseRepository):
         result = await self.db.execute(query)
         return result.scalars().first()
 
+    async def get_by_reset_token(self, token: str) -> Optional[User]:
+        query = select(self.model).where(self.model.password_reset_token == token)
+        result = await self.db.execute(query)
+        return result.scalars().first()
+
+    async def get_list(
+        self,
+        role: Optional[str],
+        status: Optional[str],
+        search: Optional[str],
+        limit: int,
+        offset: int,
+    ) -> dict:
+        base = select(self.model)
+        if role:
+            base = base.where(self.model.role == role)
+        if status:
+            base = base.where(self.model.status == status)
+        if search:
+            pattern = f"%{search}%"
+            base = base.where(
+                (self.model.email.ilike(pattern))
+                | (self.model.first_name.ilike(pattern))
+                | (self.model.last_name.ilike(pattern))
+            )
+
+        count_query = select(func.count()).select_from(base.subquery())
+        count_result = await self.db.execute(count_query)
+        total = count_result.scalar()
+
+        items_query = base.order_by(self.model.created_at.desc()).offset(offset).limit(limit)
+        items_result = await self.db.execute(items_query)
+        items = items_result.scalars().all()
+
+        return {"items": items, "total": total}
+
 
 class SessionRepository(BaseRepository):
     def __init__(self, db: AsyncSession):
@@ -54,6 +90,22 @@ class SessionRepository(BaseRepository):
         )
         result = await self.db.execute(query)
         return result.scalars().all()
+
+    async def get_active_by_user_paginated(self, user_id: str, limit: int, offset: int) -> dict:
+        base = select(self.model).where(
+            self.model.user_id == user_id,
+            self.model.is_active == True,
+        )
+
+        count_query = select(func.count()).select_from(base.subquery())
+        count_result = await self.db.execute(count_query)
+        total = count_result.scalar()
+
+        items_query = base.order_by(self.model.created_at.desc()).offset(offset).limit(limit)
+        items_result = await self.db.execute(items_query)
+        items = items_result.scalars().all()
+
+        return {"items": items, "total": total}
 
     async def deactivate(self, session_id: str) -> None:
         query = (
@@ -89,6 +141,69 @@ class AuditLogRepository(BaseRepository):
         total = count_result.scalar()
 
         offset = (page - 1) * limit
+        items_query = base.order_by(self.model.created_at.desc()).offset(offset).limit(limit)
+        items_result = await self.db.execute(items_query)
+        items = items_result.scalars().all()
+
+        return {"items": items, "total": total}
+
+    async def get_audit_log(
+        self,
+        user_id: Optional[str],
+        action: Optional[str],
+        entity_type: Optional[str],
+        from_date: Optional[datetime],
+        to_date: Optional[datetime],
+        limit: int,
+        offset: int,
+    ) -> dict:
+        base = select(self.model)
+        if user_id:
+            base = base.where(self.model.user_id == user_id)
+        if action:
+            base = base.where(self.model.action == action)
+        if entity_type:
+            base = base.where(self.model.entity_type == entity_type)
+        if from_date:
+            base = base.where(self.model.created_at >= from_date)
+        if to_date:
+            base = base.where(self.model.created_at <= to_date)
+
+        count_query = select(func.count()).select_from(base.subquery())
+        count_result = await self.db.execute(count_query)
+        total = count_result.scalar()
+
+        items_query = base.order_by(self.model.created_at.desc()).offset(offset).limit(limit)
+        items_result = await self.db.execute(items_query)
+        items = items_result.scalars().all()
+
+        return {"items": items, "total": total}
+
+    async def get_login_history(
+        self,
+        user_id: str,
+        action: Optional[str],
+        from_date: Optional[datetime],
+        to_date: Optional[datetime],
+        limit: int,
+        offset: int,
+    ) -> dict:
+        auth_actions = ["login_success", "login_failed", "logout"]
+        base = select(self.model).where(
+            self.model.user_id == user_id,
+            self.model.action.in_(auth_actions),
+        )
+        if action:
+            base = base.where(self.model.action == action)
+        if from_date:
+            base = base.where(self.model.created_at >= from_date)
+        if to_date:
+            base = base.where(self.model.created_at <= to_date)
+
+        count_query = select(func.count()).select_from(base.subquery())
+        count_result = await self.db.execute(count_query)
+        total = count_result.scalar()
+
         items_query = base.order_by(self.model.created_at.desc()).offset(offset).limit(limit)
         items_result = await self.db.execute(items_query)
         items = items_result.scalars().all()
