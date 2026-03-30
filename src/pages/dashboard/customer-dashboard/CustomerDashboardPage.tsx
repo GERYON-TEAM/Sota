@@ -49,7 +49,7 @@ export default function CustomerDashboardPage() {
         taskDate: '05.03.2026',
         progress: 40,
         leadName: 'Анна Миронова',
-        leadRole: 'Product Owner',
+        leadRole: 'Tech Lead',
       },
       {
         role: 'Черновик',
@@ -69,7 +69,7 @@ export default function CustomerDashboardPage() {
         taskDate: '02.04.2026',
         progress: 55,
         leadName: 'Мария Орлова',
-        leadRole: 'Project Manager',
+        leadRole: 'Tech Lead',
       },
       {
         role: 'Опубликовано',
@@ -89,7 +89,7 @@ export default function CustomerDashboardPage() {
         taskDate: '28.03.2026',
         progress: 100,
         leadName: 'Екатерина Громова',
-        leadRole: 'Product Owner',
+        leadRole: 'Tech Lead',
       },
       {
         role: 'Черновик',

@@ -55,9 +55,9 @@ export default function SpecialistPortfolio() {
   const [skillLevel, setSkillLevel] = useState('')
   const [progressOpen, setProgressOpen] = useState(false)
   const [progress, setProgress] = useState<number>(0)
-  const [githubUrl, setGithubUrl] = useState('')
-  const [telegramUrl, setTelegramUrl] = useState('')
-  const [emailAddress, setEmailAddress] = useState('')
+  const [githubUrl, setGithubUrl] = useState('github.com/alinak')
+  const [telegramUrl, setTelegramUrl] = useState('@alina_k')
+  const [emailAddress, setEmailAddress] = useState('alina@example.com')
   const [editGithubUrl, setEditGithubUrl] = useState('')
   const [editTelegramUrl, setEditTelegramUrl] = useState('')
   const [editEmailAddress, setEditEmailAddress] = useState('')
@@ -101,7 +101,6 @@ export default function SpecialistPortfolio() {
   const normalizedGithubUrl = normalizeGithub(githubUrl)
   const normalizedTelegramUrl = normalizeTelegram(telegramUrl)
   const normalizedEmailUrl = normalizeEmail(emailAddress)
-  const hasAnyContacts = Boolean(normalizedGithubUrl || normalizedTelegramUrl || normalizedEmailUrl)
 
   const handleAvatarFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return
@@ -351,7 +350,6 @@ export default function SpecialistPortfolio() {
             avatarUrl={avatarUrl}
             aboutText={aboutText}
             techList={techList}
-            hasAnyContacts={hasAnyContacts}
             normalizedGithubUrl={normalizedGithubUrl}
             normalizedTelegramUrl={normalizedTelegramUrl}
             normalizedEmailUrl={normalizedEmailUrl}

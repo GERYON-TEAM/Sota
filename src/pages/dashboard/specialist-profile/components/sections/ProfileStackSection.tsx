@@ -26,6 +26,8 @@ type ProfileStackSectionProps = {
   stackPlaceholder?: string
   stackVariant?: 'stack' | 'count'
   hideStackField?: boolean
+  hideExperienceField?: boolean
+  hideGithubField?: boolean
 }
 
 export default function ProfileStackSection({
@@ -52,6 +54,8 @@ export default function ProfileStackSection({
   stackPlaceholder,
   stackVariant = 'stack',
   hideStackField = false,
+  hideExperienceField = false,
+  hideGithubField = false,
 }: ProfileStackSectionProps) {
   const resolvedAboutLabel = aboutLabel ?? 'О специалисте'
   const resolvedStackLabel = stackLabel ?? 'Стек технологий'
@@ -71,12 +75,14 @@ export default function ProfileStackSection({
         </button>
       </div>
 
-      <Field
-        label="Опыт"
-        value={aboutExperience}
-        onChange={onExperienceChange}
-        placeholder="Опыт"
-      />
+      {!hideExperienceField && (
+        <Field
+          label="Опыт"
+          value={aboutExperience}
+          onChange={onExperienceChange}
+          placeholder="Опыт"
+        />
+      )}
       <TextareaField label={resolvedAboutLabel} value={aboutBio} onChange={onBioChange} />
 
       {!hideStackField && (
@@ -126,13 +132,15 @@ export default function ProfileStackSection({
         placeholder="Ссылка на Telegram"
         type="url"
       />
-      <Field
-        label="GitHub"
-        value={contactGithub}
-        onChange={onContactGithubChange}
-        placeholder="Ссылка на GitHub"
-        type="url"
-      />
+      {!hideGithubField && (
+        <Field
+          label="GitHub"
+          value={contactGithub}
+          onChange={onContactGithubChange}
+          placeholder="Ссылка на GitHub"
+          type="url"
+        />
+      )}
     </div>
   )
 }

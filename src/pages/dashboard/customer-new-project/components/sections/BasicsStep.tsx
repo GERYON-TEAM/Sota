@@ -15,6 +15,8 @@ type BasicsStepProps = {
   projectFeatures: string[]
   projectName: string
   projectDescription: string
+  projectGoals: string
+  projectAudience: string
   projectNotes: string
   files: File[]
   draftFileNames: string[]
@@ -29,6 +31,8 @@ type BasicsStepProps = {
   setProjectFeatureValues: (value: string[]) => void
   setProjectName: (value: string) => void
   setProjectDescription: (value: string) => void
+  setProjectGoals: (value: string) => void
+  setProjectAudience: (value: string) => void
   setProjectNotes: (value: string) => void
   handleFileInputChange: (event: ChangeEvent<HTMLInputElement>) => void
   handleDrop: (event: DragEvent<HTMLButtonElement>) => void
@@ -50,6 +54,8 @@ export default function BasicsStep(props: BasicsStepProps) {
     projectFeatures,
     projectName,
     projectDescription,
+    projectGoals,
+    projectAudience,
     projectNotes,
     files,
     draftFileNames,
@@ -64,6 +70,8 @@ export default function BasicsStep(props: BasicsStepProps) {
     setProjectFeatureValues,
     setProjectName,
     setProjectDescription,
+    setProjectGoals,
+    setProjectAudience,
     setProjectNotes,
     handleFileInputChange,
     handleDrop,
@@ -83,35 +91,63 @@ export default function BasicsStep(props: BasicsStepProps) {
         placeholder="Укажите название проекта"
       />
 
-      <TextareaField
-        id="project-description"
-        label="Описание задачи"
-        value={projectDescription}
-        onChange={setProjectDescription}
-        placeholder="Опишите задачу, цели и ожидаемый результат"
-      />
+      <div className="customer-new-project-form__group">
+        <div className="customer-new-project-form__label-row">
+          <label className="customer-new-project-form__label" htmlFor="project-description">
+            Описание задачи
+          </label>
+          <span className="customer-new-project-form__counter">{projectDescription.length}/500</span>
+        </div>
+        <TextareaField
+          id="project-description"
+          label=""
+          value={projectDescription}
+          onChange={(value) => setProjectDescription(value.slice(0, 500))}
+          placeholder="Как можно подробнее опишите задачи вашего проекта"
+          maxLength={500}
+        />
+      </div>
 
-      <Select
-        label="Тип проекта"
-        value={projectTypeValue}
-        options={projectTypes}
-        placeholder="Выберите тип проекта"
-        open={projectTypeOpen}
-        onToggle={() => {
-          setProjectTypeOpen(!projectTypeOpen)
-          setProjectSizeOpen(false)
-        }}
-        onSelect={(value) => {
-          setProjectTypeValue(value)
-          setProjectTypeOpen(false)
-        }}
-      />
+      <div className="customer-new-project-form__group">
+        <div className="customer-new-project-form__label-row">
+          <label className="customer-new-project-form__label" htmlFor="project-goals">
+            Цели проекта
+          </label>
+          <span className="customer-new-project-form__counter">{projectGoals.length}/500</span>
+        </div>
+        <TextareaField
+          id="project-goals"
+          label=""
+          value={projectGoals}
+          onChange={(value) => setProjectGoals(value.slice(0, 500))}
+          placeholder="Опишите цели вашего проекта"
+          maxLength={500}
+        />
+      </div>
+
+      <div className="customer-new-project-form__group">
+        <div className="customer-new-project-form__label-row">
+          <label className="customer-new-project-form__label" htmlFor="project-audience">
+            Целевая аудитория
+          </label>
+          <span className="customer-new-project-form__counter">{projectAudience.length}/250</span>
+        </div>
+        <TextareaField
+          id="project-audience"
+          label=""
+          value={projectAudience}
+          onChange={(value) => setProjectAudience(value.slice(0, 250))}
+          placeholder="Опишите целевую аудиторию вашего проекта"
+          maxLength={250}
+          className="customer-new-project-form__textarea customer-new-project-form__textarea--compact"
+        />
+      </div>
 
       <Select
         label="Оценочный размер проекта"
         value={projectSizeValue}
         options={projectSizes}
-        placeholder="Выберите размер проекта"
+        placeholder="Выберите оценочный размер проекта"
         open={projectSizeOpen}
         onToggle={() => {
           setProjectSizeOpen(!projectSizeOpen)
@@ -120,6 +156,22 @@ export default function BasicsStep(props: BasicsStepProps) {
         onSelect={(value) => {
           setProjectSizeValue(value)
           setProjectSizeOpen(false)
+        }}
+      />
+
+      <Select
+        label="Тип проекта"
+        value={projectTypeValue}
+        options={projectTypes}
+        placeholder="Выберите тип проекта из списка"
+        open={projectTypeOpen}
+        onToggle={() => {
+          setProjectTypeOpen(!projectTypeOpen)
+          setProjectSizeOpen(false)
+        }}
+        onSelect={(value) => {
+          setProjectTypeValue(value)
+          setProjectTypeOpen(false)
         }}
       />
 
@@ -199,9 +251,10 @@ export default function BasicsStep(props: BasicsStepProps) {
           label=""
           value={projectNotes}
           onChange={(value) => setProjectNotes(value.slice(0, 1000))}
-          placeholder="Укажите стек, навыки и другие важные уточнения"
+          placeholder="Что бы вы хотели добавить? Например, предпочтительный стек технологий, желаемый уровень или тип специалистов, особенности домена и т.п."
           maxLength={1000}
         />
+        <p className="customer-new-project-form__hint">Это необязательное поле, его можно не заполнять</p>
       </div>
     </div>
   )

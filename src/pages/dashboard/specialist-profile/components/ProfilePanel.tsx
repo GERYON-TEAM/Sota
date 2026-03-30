@@ -43,6 +43,8 @@ type ProfilePanelProps = {
   stackPlaceholder?: string
   stackVariant?: 'stack' | 'count'
   hideStackField?: boolean
+  hideExperienceField?: boolean
+  hideGithubField?: boolean
 }
 
 export default function ProfilePanel({
@@ -83,6 +85,8 @@ export default function ProfilePanel({
   stackPlaceholder,
   stackVariant,
   hideStackField,
+  hideExperienceField,
+  hideGithubField,
 }: ProfilePanelProps) {
   return (
     <div className="profile-page__panel">
@@ -136,6 +140,8 @@ export default function ProfilePanel({
           stackPlaceholder={stackPlaceholder}
           stackVariant={stackVariant}
           hideStackField={hideStackField}
+          hideExperienceField={hideExperienceField}
+          hideGithubField={hideGithubField}
         />
       )}
 

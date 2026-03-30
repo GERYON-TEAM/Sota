@@ -7,10 +7,13 @@ export default function NewProjectSteps({ steps, currentStep }: NewProjectStepsP
   return (
     <section className="customer-new-project-steps" aria-label="Шаги создания проекта">
       {steps.map((step, index) => (
-        <div className="customer-new-project-steps__item" key={step.label}>
+        <div
+          className={`customer-new-project-steps__item${index < currentStep ? ' is-complete' : ''}${index === currentStep ? ' is-current' : ''}`}
+          key={step.label}
+        >
           <span className="customer-new-project-steps__label">{step.label}</span>
           <span className="customer-new-project-steps__track" aria-hidden="true">
-            <span className={`customer-new-project-steps__fill${index < currentStep ? ' is-active' : ''}`} />
+            <span className={`customer-new-project-steps__fill${index <= currentStep ? ' is-active' : ''}`} />
           </span>
         </div>
       ))}

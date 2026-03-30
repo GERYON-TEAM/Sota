@@ -4,6 +4,7 @@ type TextareaFieldProps = {
   value: string
   placeholder?: string
   maxLength?: number
+  className?: string
   onChange: (value: string) => void
 }
 
@@ -13,6 +14,7 @@ export default function TextareaField({
   value,
   placeholder,
   maxLength,
+  className = 'customer-new-project-form__textarea',
   onChange,
 }: TextareaFieldProps) {
   return (
@@ -24,7 +26,7 @@ export default function TextareaField({
       ) : null}
       <textarea
         id={id}
-        className="customer-new-project-form__textarea"
+        className={className}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}

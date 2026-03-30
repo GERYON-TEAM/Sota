@@ -40,13 +40,10 @@ export default function CustomerProfilePage() {
     avatarUrl,
     setAvatarUrl,
     aboutExperience,
-    setAboutExperience,
     aboutBio,
     setAboutBio,
     aboutStack,
-    setAboutStack,
     aboutStackItems,
-    addStackItems,
     contactPhone,
     setContactPhone,
     contactEmail,
@@ -54,7 +51,6 @@ export default function CustomerProfilePage() {
     contactTelegram,
     setContactTelegram,
     contactGithub,
-    setContactGithub,
   } = useProfileDraft()
 
   const { handleAvatarChange } = useAvatarUpload({ setAvatarUrl, setProfileDirty })
@@ -106,22 +102,13 @@ export default function CustomerProfilePage() {
                 aboutBio={aboutBio}
                 aboutStack={aboutStack}
                 aboutStackItems={aboutStackItems}
-                onAboutExperienceChange={(value) => {
-                  setAboutExperience(value)
-                  setProfileDirty(true)
-                }}
-                onAboutBioChange={(value) => {
+                onExperienceChange={() => {}}
+                onBioChange={(value) => {
                   setAboutBio(value)
                   setProfileDirty(true)
                 }}
-                onAboutStackChange={(value) => {
-                  setAboutStack(value)
-                  setProfileDirty(true)
-                }}
-                onAddStackItem={(value) => {
-                  addStackItems(value)
-                  setProfileDirty(true)
-                }}
+                onStackChange={() => {}}
+                onAddStack={() => {}}
                 contactPhone={contactPhone}
                 contactEmail={contactEmail}
                 contactTelegram={contactTelegram}
@@ -138,12 +125,11 @@ export default function CustomerProfilePage() {
                   setContactTelegram(value)
                   setProfileDirty(true)
                 }}
-                onContactGithubChange={(value) => {
-                  setContactGithub(value)
-                  setProfileDirty(true)
-                }}
+                onContactGithubChange={() => {}}
                 aboutLabel="О заказчике"
                 hideStackField
+                hideExperienceField
+                hideGithubField
                 twoFactorEnabled={twoFactorEnabled}
                 onToggleTwoFactor={() => setTwoFactorEnabled((prev) => !prev)}
                 onOpenPasswordModal={() => setPasswordModalOpen(true)}
@@ -154,55 +140,28 @@ export default function CustomerProfilePage() {
         </div>
       </main>
 
-      {passwordModalOpen && (
-        <EditFieldModal
-          title="Изменить пароль"
-          submitLabel="Сохранить"
-          onClose={() => setPasswordModalOpen(false)}
-          onSubmit={() => setPasswordModalOpen(false)}
-        >
-          <div className="profile-modal__grid">
-            <label className="profile-modal__label">
-              Текущий пароль
-              <input
-                className="profile-modal__input"
-                type="password"
-                value={currentPassword}
-                onChange={(event) => setCurrentPassword(event.target.value)}
-              />
-            </label>
-            <label className="profile-modal__label">
-              Новый пароль
-              <input
-                className="profile-modal__input"
-                type="password"
-                value={newPassword}
-                onChange={(event) => setNewPassword(event.target.value)}
-              />
-            </label>
-            <label className="profile-modal__label">
-              Повторите пароль
-              <input
-                className="profile-modal__input"
-                type="password"
-                value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
-              />
-            </label>
-          </div>
-        </EditFieldModal>
-      )}
+      <EditFieldModal
+        isOpen={passwordModalOpen}
+        currentPassword={currentPassword}
+        newPassword={newPassword}
+        confirmPassword={confirmPassword}
+        onChangeCurrent={setCurrentPassword}
+        onChangeNew={setNewPassword}
+        onChangeConfirm={setConfirmPassword}
+        onClose={() => setPasswordModalOpen(false)}
+        onSave={() => {
+          setPasswordModalOpen(false)
+          setCurrentPassword('')
+          setNewPassword('')
+          setConfirmPassword('')
+        }}
+      />
 
-      {deleteModalOpen && (
-        <ConfirmModal
-          title="Удалить аккаунт?"
-          description="Это действие нельзя отменить."
-          cancelLabel="Отмена"
-          confirmLabel="Удалить аккаунт"
-          onClose={() => setDeleteModalOpen(false)}
-          onConfirm={() => setDeleteModalOpen(false)}
-        />
-      )}
+      <ConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={() => setDeleteModalOpen(false)}
+      />
     </div>
   )
 }

@@ -3,9 +3,16 @@ import KanbanCard from './KanbanCard'
 type KanbanColumnProps = {
   title: string
   onMenuClick: () => void
+  onArtifactOpen: () => void
+  onCreateProject: () => void
 }
 
-export default function KanbanColumn({ title, onMenuClick }: KanbanColumnProps) {
+export default function KanbanColumn({
+  title,
+  onMenuClick,
+  onArtifactOpen,
+  onCreateProject,
+}: KanbanColumnProps) {
   const columnClass =
     title === 'В работе'
       ? 'is-work'
@@ -43,7 +50,12 @@ export default function KanbanColumn({ title, onMenuClick }: KanbanColumnProps) 
             1
           </div>
 
-          <button className="kanban-icon-btn" type="button" aria-label="Добавить задачу">
+          <button
+            className="kanban-icon-btn"
+            type="button"
+            aria-label="Создать проект"
+            onClick={onCreateProject}
+          >
             <span className="kanban-plus">+</span>
           </button>
 
@@ -73,8 +85,13 @@ export default function KanbanColumn({ title, onMenuClick }: KanbanColumnProps) 
         </div>
       </div>
 
-      <KanbanCard title="Создать документ" priorityLabel={priorityLabel} priorityClassName={priorityClass} />
-      <KanbanCard title="Создать документ" priorityLabel="П1" />
+      <KanbanCard
+        title="Создать документ"
+        priorityLabel={priorityLabel}
+        priorityClassName={priorityClass}
+        onOpen={onArtifactOpen}
+      />
+      <KanbanCard title="Создать документ" priorityLabel="П1" onOpen={onArtifactOpen} />
     </article>
   )
 }

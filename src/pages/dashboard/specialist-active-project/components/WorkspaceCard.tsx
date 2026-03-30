@@ -43,7 +43,7 @@ export default function WorkspaceCard({ title, onOpen, onChatOpen }: WorkspaceCa
           Чат
         </button>
         <button className="project-workspace__open" type="button" onClick={onOpen}>
-          Открыть
+          Создать
         </button>
       </div>
     </div>

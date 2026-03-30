@@ -11,7 +11,7 @@ export type OpenProject = {
   track: string[]
 }
 
-export type SortMode = 'match' | 'date' | 'level' | 'budget' | null
+export type SortMode = 'match' | 'date' | 'level' | null
 export type MatchSort = 'high' | 'low'
 export type DateSort = 'old' | 'new'
 export type LevelSort = 'junior' | 'middle' | 'senior'

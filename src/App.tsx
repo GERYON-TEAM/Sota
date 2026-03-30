@@ -15,8 +15,6 @@ import SpecialistInviteProject from './pages/dashboard/SpecialistInviteProject.t
 import SpecialistPortfolioProject from './pages/dashboard/SpecialistPortfolioProject.tsx'
 import CustomerDashboard from './pages/dashboard/CustomerDashboard.tsx'
 import CustomerProject from './pages/dashboard/CustomerProject.tsx'
-import CustomerProjectPortfolio from './pages/dashboard/CustomerProjectPortfolio.tsx'
-import CustomerProjectPortfolioProject from './pages/dashboard/CustomerProjectPortfolioProject.tsx'
 import CustomerProfile from './pages/dashboard/CustomerProfile.tsx'
 import CustomerNewProject from './pages/dashboard/CustomerNewProject.tsx'
 import ValidatorQueue from './pages/dashboard/ValidatorQueue.tsx'
@@ -77,15 +75,15 @@ function App() {
   }
   if (
     path === '/dashboard/customer/project/portfolio' ||
-    path === '/dashboard/custom/project/portfolio'
-  ) {
-    return <CustomerProjectPortfolio />
-  }
-  if (
     path === '/dashboard/customer/project/portfolio/project' ||
+    path === '/dashboard/custom/project/portfolio' ||
     path === '/dashboard/custom/project/portfolio/project'
   ) {
-    return <CustomerProjectPortfolioProject />
+    const redirectPath = path.startsWith('/dashboard/custom')
+      ? '/dashboard/custom/project'
+      : '/dashboard/customer/project'
+    window.history.replaceState(null, '', redirectPath)
+    return <CustomerProject />
   }
   if (path === '/dashboard/specialist/open-projects/project') {
     return <SpecialistProject />

@@ -2,11 +2,12 @@ type KanbanCardProps = {
   title: string
   priorityLabel: string
   priorityClassName?: string
+  onOpen?: () => void
 }
 
-export default function KanbanCard({ title, priorityLabel, priorityClassName }: KanbanCardProps) {
+export default function KanbanCard({ title, priorityLabel, priorityClassName, onOpen }: KanbanCardProps) {
   return (
-    <div className="kanban-card">
+    <button className="kanban-card" type="button" onClick={onOpen}>
       <div className="kanban-card__meta">
         <div className="kanban-chip">SP 3</div>
         <div className="kanban-chip">Артефакты</div>
@@ -70,6 +71,6 @@ export default function KanbanCard({ title, priorityLabel, priorityClassName }: 
           <img className="kanban-avatar" src="/avatar2.jpg" alt="" />
         </div>
       </div>
-    </div>
+    </button>
   )
 }

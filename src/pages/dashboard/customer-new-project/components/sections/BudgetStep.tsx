@@ -17,6 +17,7 @@ type BudgetStepProps = {
   setProjectStart: (value: string) => void
   setProjectEnd: (value: string) => void
   sanitizeDigits: (value: string) => string
+  stepNumericValue: (currentValue: string, delta: number) => string
   formatDate: (value: string) => string
   openDatePicker: (ref: { current: HTMLInputElement | null }) => void
 }
@@ -37,6 +38,7 @@ export default function BudgetStep(props: BudgetStepProps) {
     setProjectStart,
     setProjectEnd,
     sanitizeDigits,
+    stepNumericValue,
     formatDate,
     openDatePicker,
   } = props
@@ -60,7 +62,7 @@ export default function BudgetStep(props: BudgetStepProps) {
         label="Бюджет, ₽"
         value={budgetValue}
         onChange={(value) => setBudgetValue(sanitizeDigits(value))}
-        onStep={() => {}}
+        onStep={(delta) => setBudgetValue(stepNumericValue(budgetValue, delta))}
         placeholder="Укажите бюджет проекта"
       />
 

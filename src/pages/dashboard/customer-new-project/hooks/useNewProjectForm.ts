@@ -35,6 +35,8 @@ export function useNewProjectForm() {
   const [projectFeatureValues, setProjectFeatureValues] = useState<string[]>([])
   const [projectName, setProjectName] = useState('')
   const [projectDescription, setProjectDescription] = useState('')
+  const [projectGoals, setProjectGoals] = useState('')
+  const [projectAudience, setProjectAudience] = useState('')
   const [projectNotes, setProjectNotes] = useState('')
 
   const [paymentTypeOpen, setPaymentTypeOpen] = useState(false)
@@ -81,15 +83,15 @@ export function useNewProjectForm() {
       },
       {
         key: 'team',
-        label: 'Планирование',
-        title: 'Планирование',
+        label: 'Генерация плана',
+        title: 'Генерация плана',
         description: 'Это опциональный этап, вы можете его пропустить',
       },
       {
         key: 'review',
         label: 'Валидация',
         title: 'Валидация',
-        description: 'Проверьте правильность данных. Вы можете менять данные',
+        description: 'Проверьте правильность данных. Вы можете изменить их или продолжить',
       },
       {
         key: 'attachments',
@@ -164,6 +166,8 @@ export function useNewProjectForm() {
       projectFeatureValues,
       projectName,
       projectDescription,
+      projectGoals,
+      projectAudience,
       projectNotes,
       paymentTypeValue,
       flexibleDeadlines,
@@ -188,6 +192,8 @@ export function useNewProjectForm() {
       projectFeatureValues,
       projectName,
       projectDescription,
+      projectGoals,
+      projectAudience,
       projectNotes,
       paymentTypeValue,
       flexibleDeadlines,
@@ -245,8 +251,10 @@ export function useNewProjectForm() {
       )
     }
     if (typeof draft.projectName === 'string') setProjectName(draft.projectName)
-    if (typeof draft.projectDescription === 'string') setProjectDescription(draft.projectDescription)
-    if (typeof draft.projectNotes === 'string') setProjectNotes(draft.projectNotes)
+    if (typeof draft.projectDescription === 'string') setProjectDescription(draft.projectDescription.slice(0, 500))
+    if (typeof draft.projectGoals === 'string') setProjectGoals(draft.projectGoals.slice(0, 500))
+    if (typeof draft.projectAudience === 'string') setProjectAudience(draft.projectAudience.slice(0, 250))
+    if (typeof draft.projectNotes === 'string') setProjectNotes(draft.projectNotes.slice(0, 1000))
     if (typeof draft.paymentTypeValue === 'string') setPaymentTypeValue(draft.paymentTypeValue)
     if (typeof draft.flexibleDeadlines === 'boolean') setFlexibleDeadlines(draft.flexibleDeadlines)
     if (typeof draft.projectBalanceValue === 'string') setProjectBalanceValue(draft.projectBalanceValue)
@@ -305,6 +313,8 @@ export function useNewProjectForm() {
     setProjectBalanceValue,
     setProjectName,
     setProjectDescription,
+    setProjectGoals,
+    setProjectAudience,
     setProjectNotes,
     setMaxHourlyRate,
     setBudgetValue,

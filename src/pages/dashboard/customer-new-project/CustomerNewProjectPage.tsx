@@ -6,6 +6,7 @@ import { useDashboardDropdowns } from '../specialist-dashboard/hooks/useDashboar
 import NewProjectHeader from './components/NewProjectHeader'
 import NewProjectSteps from './components/NewProjectSteps'
 import NewProjectFooter from './components/NewProjectFooter'
+import PublishedProjectView from './components/PublishedProjectView'
 import BasicsStep from './components/sections/BasicsStep'
 import BudgetStep from './components/sections/BudgetStep'
 import TeamStep from './components/sections/TeamStep'
@@ -13,7 +14,6 @@ import ReviewStep from './components/sections/ReviewStep'
 import AttachmentsStep from './components/sections/AttachmentsStep'
 import DetailsStep from './components/sections/DetailsStep'
 import ConfirmLeaveModal from './components/modals/ConfirmLeaveModal'
-import SuccessModal from './components/modals/SuccessModal'
 import TemplateModal from './components/modals/TemplateModal'
 import { useNewProjectForm } from './hooks/useNewProjectForm'
 import { useNewProjectValidation } from './hooks/useNewProjectValidation'
@@ -49,6 +49,8 @@ export default function CustomerNewProjectPage() {
 
   const currentStepMeta = form.steps[stepsState.step]
   const isPlanningBusy = stepsState.step === 2 && planningLoadingActive
+  const isPublished = successOpen
+  const projectsPath = `${form.dashboardBasePath}/project`
 
   const handleSaveDraft = () => {
     const isSaved = persist(form.createDraftPayload(stepsState.step))
@@ -86,6 +88,8 @@ export default function CustomerNewProjectPage() {
           projectFeatures={form.projectFeatures}
           projectName={form.values.projectName}
           projectDescription={form.values.projectDescription}
+          projectGoals={form.values.projectGoals}
+          projectAudience={form.values.projectAudience}
           projectNotes={form.values.projectNotes}
           files={form.uploads.files}
           draftFileNames={form.uploads.draftFileNames}
@@ -100,6 +104,8 @@ export default function CustomerNewProjectPage() {
           setProjectFeatureValues={form.setProjectFeatureValues}
           setProjectName={form.setProjectName}
           setProjectDescription={form.setProjectDescription}
+          setProjectGoals={form.setProjectGoals}
+          setProjectAudience={form.setProjectAudience}
           setProjectNotes={form.setProjectNotes}
           handleFileInputChange={form.uploads.handleFileInputChange}
           handleDrop={form.uploads.handleDrop}
@@ -128,6 +134,7 @@ export default function CustomerNewProjectPage() {
           setProjectStart={form.setProjectStart}
           setProjectEnd={form.setProjectEnd}
           sanitizeDigits={form.sanitizeDigits}
+          stepNumericValue={form.stepNumericValue}
           formatDate={form.formatDate}
           openDatePicker={form.openDatePicker}
         />
@@ -164,18 +171,10 @@ export default function CustomerNewProjectPage() {
         <ReviewStep
           projectName={form.values.projectName}
           projectDescription={form.values.projectDescription}
-          projectTypeOpen={form.projectTypeOpen}
           projectTypeValue={form.values.projectTypeValue}
-          projectTypes={form.projectTypes}
           budgetValue={form.values.budgetValue}
           projectStart={form.values.projectStart}
           projectEnd={form.values.projectEnd}
-          setProjectName={form.setProjectName}
-          setProjectDescription={form.setProjectDescription}
-          projectNotes={form.values.projectNotes}
-          setProjectTypeOpen={form.setProjectTypeOpen}
-          setProjectTypeValue={form.setProjectTypeValue}
-          setProjectNotes={form.setProjectNotes}
         />
       )
     }
@@ -203,8 +202,8 @@ export default function CustomerNewProjectPage() {
   }
 
   return (
-    <div className="dashboard dashboard--customer">
-      <CustomerSidebar />
+    <div className={`dashboard dashboard--customer customer-new-project-page${isPublished ? ' customer-new-project-page--published' : ''}`}>
+      {!isPublished && <CustomerSidebar />}
 
       <main className="dashboard-content">
         <NewProjectHeader
@@ -214,50 +213,70 @@ export default function CustomerNewProjectPage() {
           onBellClose={() => setBellOpen(false)}
         />
 
-        <div
-          className="dashboard-surface customer-new-project-surface"
-          onClick={() => {
-            form.closeDropdowns()
-          }}
-        >
-          <NewProjectSteps steps={form.steps} currentStep={stepsState.step} />
+        {isPublished ? (
+          <div className="dashboard-surface customer-new-project-surface customer-new-project-surface--published">
+            <PublishedProjectView onGoToProjects={() => { window.location.href = projectsPath }} />
+          </div>
+        ) : (
+          <div
+            className="dashboard-surface customer-new-project-surface"
+            onClick={() => {
+              form.closeDropdowns()
+            }}
+          >
+            <NewProjectSteps steps={form.steps} currentStep={stepsState.step} />
 
-          <section className={`customer-new-project-layout${isPlanningBusy ? ' customer-new-project-layout--planning-loading' : ''}`}>
-            <div className={`customer-new-project-main${isPlanningBusy ? ' customer-new-project-main--planning-loading' : ''}`}>
+            <section className={`customer-new-project-layout${isPlanningBusy ? ' customer-new-project-layout--planning-loading' : ''}`}>
               {!isPlanningBusy && (
-                <div className="customer-new-project-intro">
-                  <h2 className="customer-new-project-intro__title">{currentStepMeta.title}</h2>
-                  <p className="customer-new-project-intro__text">{currentStepMeta.description}</p>
+                <div className="customer-new-project-main__side">
+                  <div className="customer-new-project-intro">
+                    <h2 className="customer-new-project-intro__title">{currentStepMeta.title}</h2>
+                    <p className="customer-new-project-intro__text">{currentStepMeta.description}</p>
+                  </div>
+
+                  <button
+                    className={`customer-new-project-exit${stepsState.step === 4 ? ' customer-new-project-exit--payment' : ''}`}
+                    type="button"
+                    onClick={() => setConfirmLeaveOpen(true)}
+                  >
+                    Выйти
+                  </button>
                 </div>
               )}
 
-              {renderCurrentStep()}
+              <div className={`customer-new-project-main${isPlanningBusy ? ' customer-new-project-main--planning-loading' : ''}`}>
+                {renderCurrentStep()}
 
-              <button
-                className="customer-new-project-exit"
-                type="button"
-                onClick={() => setConfirmLeaveOpen(true)}
-              >
-                Выйти
-              </button>
-            </div>
+                {isPlanningBusy && (
+                  <button
+                    className="customer-new-project-exit customer-new-project-exit--planning"
+                    type="button"
+                    onClick={() => setConfirmLeaveOpen(true)}
+                  >
+                    Выйти
+                  </button>
+                )}
+              </div>
 
-            {!isPlanningBusy && (
-              <NewProjectFooter
-                currentStep={stepsState.step}
-                totalSteps={form.steps.length}
-                canNext={stepsState.canNext}
-                validationAgreement={form.values.validationAgreement}
-                onSaveDraft={handleSaveDraft}
-                onSkipPlanning={() => stepsState.next()}
-                onPublish={handlePublish}
-                onBack={() => stepsState.back()}
-                onNext={() => stepsState.next()}
-                onValidationAgreementChange={form.setValidationAgreement}
-              />
-            )}
-          </section>
-        </div>
+              {!isPlanningBusy && (
+                <NewProjectFooter
+                  currentStep={stepsState.step}
+                  totalSteps={form.steps.length}
+                  canNext={stepsState.canNext}
+                  validationAgreement={form.values.validationAgreement}
+                  onSaveDraft={handleSaveDraft}
+                  onSkipPlanning={() => stepsState.next()}
+                  onPublish={handlePublish}
+                  onBack={() => stepsState.back()}
+                  onNext={() => stepsState.next()}
+                  onEditRequirements={() => stepsState.goTo(0)}
+                  onEditBalance={() => stepsState.goTo(1)}
+                  onValidationAgreementChange={form.setValidationAgreement}
+                />
+              )}
+            </section>
+          </div>
+        )}
       </main>
 
       <ConfirmLeaveModal
@@ -267,14 +286,6 @@ export default function CustomerNewProjectPage() {
         onSaveAndExit={() => {
           setConfirmLeaveOpen(false)
           handleSaveDraft()
-        }}
-      />
-      <SuccessModal
-        isOpen={successOpen}
-        onClose={() => setSuccessOpen(false)}
-        onGoToProjects={() => {
-          setSuccessOpen(false)
-          window.location.href = form.dashboardBasePath
         }}
       />
       <TemplateModal isOpen={templateOpen} onClose={() => setTemplateOpen(false)} />

@@ -33,7 +33,6 @@ type OpenProjectsHeaderProps = {
   onApplyMatchSort: (value: MatchSort) => void
   onApplyDateSort: (value: DateSort) => void
   onApplyLevelSort: (value: LevelSort) => void
-  onApplyBudgetSort: () => void
   onFilterOpen: () => void
 }
 
@@ -66,7 +65,6 @@ export default function OpenProjectsHeader({
   onApplyMatchSort,
   onApplyDateSort,
   onApplyLevelSort,
-  onApplyBudgetSort,
   onFilterOpen,
 }: OpenProjectsHeaderProps) {
   return (
@@ -100,7 +98,6 @@ export default function OpenProjectsHeader({
           onApplyMatchSort={onApplyMatchSort}
           onApplyDateSort={onApplyDateSort}
           onApplyLevelSort={onApplyLevelSort}
-          onApplyBudgetSort={onApplyBudgetSort}
         />
 
         <OpenProjectsFilterButton onClick={onFilterOpen} />

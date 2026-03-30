@@ -18,6 +18,8 @@ export type NewProjectFormValues = {
   projectFeatureValues: string[]
   projectName: string
   projectDescription: string
+  projectGoals: string
+  projectAudience: string
   projectNotes: string
   paymentTypeValue: string
   flexibleDeadlines: boolean

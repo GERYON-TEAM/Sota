@@ -169,8 +169,6 @@ export default function SpecialistOpenProjectsPage() {
       return new Date(Number(year), Number(month) - 1, Number(day)).getTime()
     }
 
-    const parseBudget = (value: string) => filter.parseBudgetValue(value)
-
     const getLevel = (project: OpenProject) => {
       const found = project.skills.find((skill) =>
         ['junior', 'middle', 'senior'].includes(skill.toLowerCase())
@@ -202,17 +200,6 @@ export default function SpecialistOpenProjectsPage() {
         return rest.indexOf(level) + 1
       }
       sorted.sort((a, b) => levelRank(getLevel(a)) - levelRank(getLevel(b)))
-    }
-
-    if (sort.sortMode === 'budget') {
-      sorted.sort((a, b) => {
-        const aBudget = parseBudget(a.budget)
-        const bBudget = parseBudget(b.budget)
-        if (aBudget === null && bBudget === null) return 0
-        if (aBudget === null) return 1
-        if (bBudget === null) return -1
-        return bBudget - aBudget
-      })
     }
 
     return sorted
@@ -311,7 +298,6 @@ export default function SpecialistOpenProjectsPage() {
               sort.setLevelSort(value)
               applySort('level')
             }}
-            onApplyBudgetSort={() => applySort('budget')}
             onFilterOpen={() => filter.setFilterOpen(true)}
           />
 

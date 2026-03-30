@@ -24,7 +24,6 @@ type OpenProjectsSortProps = {
   onApplyMatchSort: (value: MatchSort) => void
   onApplyDateSort: (value: DateSort) => void
   onApplyLevelSort: (value: LevelSort) => void
-  onApplyBudgetSort: () => void
 }
 
 export default function OpenProjectsSort({
@@ -50,7 +49,6 @@ export default function OpenProjectsSort({
   onApplyMatchSort,
   onApplyDateSort,
   onApplyLevelSort,
-  onApplyBudgetSort,
 }: OpenProjectsSortProps) {
   return (
     <div className="open-projects-sort" onMouseEnter={onSortEnter} onMouseLeave={onSortLeave}>
@@ -95,7 +93,6 @@ export default function OpenProjectsSort({
         onApplyMatchSort={onApplyMatchSort}
         onApplyDateSort={onApplyDateSort}
         onApplyLevelSort={onApplyLevelSort}
-        onApplyBudgetSort={onApplyBudgetSort}
       />
     </div>
   )

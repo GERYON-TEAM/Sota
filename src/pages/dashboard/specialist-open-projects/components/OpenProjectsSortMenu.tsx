@@ -20,7 +20,6 @@ type OpenProjectsSortMenuProps = {
   onApplyMatchSort: (value: MatchSort) => void
   onApplyDateSort: (value: DateSort) => void
   onApplyLevelSort: (value: LevelSort) => void
-  onApplyBudgetSort: () => void
 }
 
 export default function OpenProjectsSortMenu({
@@ -43,7 +42,6 @@ export default function OpenProjectsSortMenu({
   onApplyMatchSort,
   onApplyDateSort,
   onApplyLevelSort,
-  onApplyBudgetSort,
 }: OpenProjectsSortMenuProps) {
   return (
     <div className={`open-projects-sort-menu ${sortOpen ? 'is-open' : ''}`} role="listbox">
@@ -266,14 +264,6 @@ export default function OpenProjectsSortMenu({
           </button>
         </div>
       </div>
-
-      <button
-        className="open-projects-sort-item open-projects-sort-item--inline"
-        type="button"
-        onClick={onApplyBudgetSort}
-      >
-        <span>По бюджету</span>
-      </button>
     </div>
   )
 }

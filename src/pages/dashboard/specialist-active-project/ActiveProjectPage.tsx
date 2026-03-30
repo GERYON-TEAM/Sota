@@ -31,15 +31,17 @@ export default function ActiveProjectPage() {
 
   const [taskStatus, setTaskStatus] = useState('В работе')
   const [taskPriority, setTaskPriority] = useState('П1')
+  const [taskModalTitle, setTaskModalTitle] = useState('Создать документ')
   const [storyPoints, setStoryPoints] = useState(3)
   const [deadlineStart, setDeadlineStart] = useState('')
   const [deadlineEnd, setDeadlineEnd] = useState('')
   const [activeTab, setActiveTab] = useState<ModalTab>('info')
   const [artifactsType, setArtifactsType] = useState('Design')
   const [descriptionEditing, setDescriptionEditing] = useState(false)
-  const [descriptionText, setDescriptionText] = useState(
+  const [savedDescriptionText, setSavedDescriptionText] = useState(
     'Здесь будет большое описание задачи. Опишите детали: цели, контекст, ограничения, ожидаемый результат, ссылки на материалы и любые важные примечания для исполнителей. Этот текст может занимать несколько абзацев и прокручиваться при необходимости.',
   )
+  const [descriptionText, setDescriptionText] = useState(savedDescriptionText)
 
   const { chatInput, setChatInput, messages, sendMessage } = useChatComposer()
 
@@ -81,6 +83,18 @@ export default function ActiveProjectPage() {
     input.click()
   }
 
+  const openDocumentModal = () => {
+    setTaskModalTitle('Создать документ')
+    setActiveTab('info')
+    setModalOpen(true)
+  }
+
+  const openProjectModal = () => {
+    setTaskModalTitle('Создать проект')
+    setActiveTab('info')
+    setModalOpen(true)
+  }
+
   return (
     <div className="dashboard">
       <Sidebar />
@@ -112,10 +126,7 @@ export default function ActiveProjectPage() {
           <section className="project-workspace">
             <WorkspaceCard
               title="Название проекта"
-              onOpen={() => {
-                setActiveTab('info')
-                setModalOpen(true)
-              }}
+              onOpen={openDocumentModal}
               onChatOpen={() => {
                 window.location.href = '/dashboard/specialist/project/chat'
               }}
@@ -134,7 +145,11 @@ export default function ActiveProjectPage() {
             />
 
             {workspaceTab === 'tasks' && (
-              <KanbanBoard onColumnMenuClick={() => setModalOpen(true)} />
+              <KanbanBoard
+                onColumnMenuClick={openDocumentModal}
+                onArtifactOpen={openDocumentModal}
+                onCreateProject={openProjectModal}
+              />
             )}
 
             {workspaceTab === 'artifacts' && (
@@ -153,6 +168,7 @@ export default function ActiveProjectPage() {
 
       {modalOpen && (
         <KanbanTaskModal
+          title={taskModalTitle}
           activeTab={activeTab}
           onTabChange={setActiveTab}
           statusOpen={statusDropdown.open}
@@ -183,7 +199,18 @@ export default function ActiveProjectPage() {
           descriptionText={descriptionText}
           descriptionEditing={descriptionEditing}
           onDescriptionChange={setDescriptionText}
-          onDescriptionToggle={() => setDescriptionEditing((prev) => !prev)}
+          onDescriptionStartEdit={() => {
+            setDescriptionText(savedDescriptionText)
+            setDescriptionEditing(true)
+          }}
+          onDescriptionSave={() => {
+            setSavedDescriptionText(descriptionText)
+            setDescriptionEditing(false)
+          }}
+          onDescriptionCancel={() => {
+            setDescriptionText(savedDescriptionText)
+            setDescriptionEditing(false)
+          }}
           chatInput={chatInput}
           messages={messages}
           onChatInputChange={setChatInput}
