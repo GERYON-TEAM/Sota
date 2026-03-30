@@ -14,7 +14,7 @@ from app.db.repositories import (
     SpecialistPdpRepository,
     ProjectRepository,
 )
-from app.core.exceptions import NotFoundError, ForbiddenError, ConflictError
+from app.core.exceptions import NotFoundError, ForbiddenError, ConflictError, UnprocessableError
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +154,7 @@ class SpecialistService:
                 raise NotFoundError(detail="Профиль специалиста не найден")
 
             if not data:
-                raise HTTPException(status_code=422, detail="Нет полей для обновления")
+                raise UnprocessableError(detail="Нет полей для обновления")
 
             allowed_fields = {
                 "bio", "contact_email", "github_url", "telegram_handle",
@@ -164,7 +164,7 @@ class SpecialistService:
             fields_to_update = {k: v for k, v in data.items() if k in allowed_fields}
 
             if not fields_to_update:
-                raise HTTPException(status_code=422, detail="Нет полей для обновления")
+                raise UnprocessableError(detail="Нет полей для обновления")
 
             now = datetime.utcnow()
             fields_to_update["updated_at"] = now
@@ -316,7 +316,7 @@ class SpecialistService:
                 raise ConflictError(detail="Срок приглашения истёк")
 
             if action == "reject" and not rejection_reason:
-                raise HTTPException(status_code=422, detail="Укажите причину отказа")
+                raise UnprocessableError(detail="Укажите причину отказа")
 
             new_status = "accepted" if action == "accept" else "rejected"
             now = datetime.utcnow()
@@ -496,13 +496,13 @@ class SpecialistService:
                 raise ConflictError(detail="Время на редактирование отзыва истекло (24 часа)")
 
             if not data:
-                raise HTTPException(status_code=422, detail="Нет полей для обновления")
+                raise UnprocessableError(detail="Нет полей для обновления")
 
             allowed_fields = {"rating", "review_text"}
             fields_to_update = {k: v for k, v in data.items() if k in allowed_fields}
 
             if not fields_to_update:
-                raise HTTPException(status_code=422, detail="Нет полей для обновления")
+                raise UnprocessableError(detail="Нет полей для обновления")
 
             now = datetime.utcnow()
             fields_to_update["updated_at"] = now
@@ -732,13 +732,13 @@ class SpecialistService:
                 raise ConflictError(detail="Нельзя обновлять архивную цель")
 
             if not data:
-                raise HTTPException(status_code=422, detail="Нет полей для обновления")
+                raise UnprocessableError(detail="Нет полей для обновления")
 
             allowed_fields = {"status", "progress_percent"}
             fields_to_update = {k: v for k, v in data.items() if k in allowed_fields}
 
             if not fields_to_update:
-                raise HTTPException(status_code=422, detail="Нет полей для обновления")
+                raise UnprocessableError(detail="Нет полей для обновления")
 
             if fields_to_update.get("status") == "completed":
                 fields_to_update["progress_percent"] = 100

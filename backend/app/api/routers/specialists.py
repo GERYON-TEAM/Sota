@@ -219,7 +219,7 @@ async def create_review(
 
 
 @router.get("/{specialist_id}/reviews/{review_id}", response_model=ReviewItem)
-@limiter.limit("30/minute")
+@limiter.limit("100/minute")
 async def get_review(
     request: Request,
     specialist_id: str,

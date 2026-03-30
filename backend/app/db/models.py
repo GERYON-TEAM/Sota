@@ -4,6 +4,7 @@ from sqlalchemy import (
     Column, String, Integer, Boolean, Numeric, Text, DateTime,
     ForeignKey, UniqueConstraint,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -123,10 +124,31 @@ class Project(Base):
     __tablename__ = "projects"
 
     id = Column(String, primary_key=True, default=generate_uuid)
+    customer_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
     title = Column(String(255), nullable=False)
-    status = Column(String(50), nullable=False)
+    description = Column(Text, nullable=False)
+    goals = Column(Text)
+    target_audience = Column(String(255))
+    project_type = Column(String(100), index=True)
+    status = Column(String(50), nullable=False, index=True)
+    complexity = Column(String(20), index=True)
+    team_balance = Column(String(20), default="optimal", index=True)
+    estimated_size = Column(String(50), index=True)
+    tech_and_roles_preferences = Column(Text)
+    tech_and_roles_preferences_processed = Column(JSONB)
+    flexible_deadline = Column(Boolean, default=False)
+    total_budget = Column(Numeric(12, 2))
+    spent_budget = Column(Numeric(12, 2), default=0)
+    start_date = Column(DateTime)
+    end_date = Column(DateTime)
+    actual_end_date = Column(DateTime)
+    specialist_id = Column(String, ForeignKey("specialist_profiles.id"), index=True)
     required_level = Column(String(50), default="junior")
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime)
+    published_at = Column(DateTime)
     completed_at = Column(DateTime)
+    archived_at = Column(DateTime)
 
 
 class ProjectRequiredSkill(Base):
@@ -140,6 +162,88 @@ class ProjectRequiredSkill(Base):
     skill_name = Column(String(255), nullable=False)
     skill_type = Column(String(50), nullable=False)
     min_proficiency = Column(Integer, nullable=False, default=1)
+
+
+class ProjectPlan(Base):
+    __tablename__ = "project_plan"
+    __table_args__ = (
+        UniqueConstraint("project_id", name="uq_project_plan_project"),
+    )
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=False, index=True)
+    version = Column(Integer, nullable=False, default=1)
+    team_composition = Column(JSONB, nullable=False)
+    phases = Column(JSONB, nullable=False)
+    timeline = Column(JSONB, nullable=False)
+    budget = Column(JSONB, nullable=False)
+    warnings = Column(JSONB)
+    input_snapshot = Column(JSONB)
+    status = Column(String(50), nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    approved_at = Column(DateTime)
+
+
+class ProjectPhase(Base):
+    __tablename__ = "project_phases"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=False, index=True)
+    team_members = Column(JSONB)
+    phase_number = Column(Integer)
+    title = Column(String(255))
+    description = Column(Text)
+    status = Column(String(50), index=True)
+    start_date = Column(DateTime)
+    end_date = Column(DateTime)
+    budget = Column(Numeric(12, 2))
+    progress_percent = Column(Integer)
+    deliverables = Column(JSONB)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime)
+
+
+class ProjectArtifact(Base):
+    __tablename__ = "project_artifacts"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=False, index=True)
+    phase_id = Column(String, ForeignKey("project_phases.id"))
+    name = Column(String(255), nullable=False)
+    description = Column(Text)
+    file_url = Column(String(500))
+    artifact_type = Column(String(100), index=True)
+    status = Column(String(50), index=True)
+    created_by = Column(String, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime)
+
+
+class ProjectResponse(Base):
+    __tablename__ = "project_responses"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=False, index=True)
+    specialist_id = Column(String, ForeignKey("specialist_profiles.id"), nullable=False, index=True)
+    proposed_price = Column(Numeric(12, 2))
+    proposed_deadline = Column(DateTime)
+    cover_letter = Column(Text)
+    status = Column(String(50), index=True)
+    rejection_reason = Column(String(500))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime)
+
+
+class ProjectAuditLog(Base):
+    __tablename__ = "project_audit_log"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=False, index=True)
+    user_id = Column(String, ForeignKey("users.id"))
+    action_type = Column(String(100), nullable=False)
+    action_description = Column(Text)
+    changed_fields = Column(JSONB)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 
 class SpecialistProfile(Base):

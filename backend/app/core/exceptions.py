@@ -31,6 +31,11 @@ class GoneError(HTTPException):
         super().__init__(status_code=410, detail=detail)
 
 
+class UnprocessableError(HTTPException):
+    def __init__(self, detail: str = "Операция не может быть выполнена"):
+        super().__init__(status_code=422, detail=detail)
+
+
 class LockedError(HTTPException):
     def __init__(self, detail: str = "Ресурс заблокирован"):
         super().__init__(status_code=423, detail=detail)
