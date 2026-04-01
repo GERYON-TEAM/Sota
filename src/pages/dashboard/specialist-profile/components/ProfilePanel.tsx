@@ -45,6 +45,11 @@ type ProfilePanelProps = {
   hideStackField?: boolean
   hideExperienceField?: boolean
   hideGithubField?: boolean
+  notificationsEnabled?: boolean
+  onToggleNotifications?: () => void
+  saving?: boolean
+  saveError?: string | null
+  fieldErrors?: Record<string, string>
 }
 
 export default function ProfilePanel({
@@ -87,6 +92,11 @@ export default function ProfilePanel({
   hideStackField,
   hideExperienceField,
   hideGithubField,
+  notificationsEnabled = true,
+  onToggleNotifications,
+  saving,
+  saveError,
+  fieldErrors = {},
 }: ProfilePanelProps) {
   return (
     <div className="profile-page__panel">
@@ -96,6 +106,8 @@ export default function ProfilePanel({
           onAvatarChange={onAvatarChange}
           onRemoveAvatar={onRemoveAvatar}
           profileDirty={profileDirty}
+          saving={saving}
+          saveError={saveError}
           onSave={onSaveProfile}
           firstName={firstName}
           lastName={lastName}
@@ -118,6 +130,9 @@ export default function ProfilePanel({
       {activeTab === 'about' && (
         <ProfileStackSection
           profileDirty={profileDirty}
+          saving={saving}
+          saveError={saveError}
+          fieldErrors={fieldErrors}
           onSave={onSaveProfile}
           aboutExperience={aboutExperience}
           aboutBio={aboutBio}
@@ -146,7 +161,7 @@ export default function ProfilePanel({
       )}
 
       {activeTab === 'notifications' && (
-        <ProfileNotificationsSection enabled={twoFactorEnabled} onToggle={onToggleTwoFactor} />
+        <ProfileNotificationsSection enabled={notificationsEnabled} onToggle={onToggleNotifications ?? (() => {})} />
       )}
     </div>
   )

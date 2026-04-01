@@ -17,7 +17,12 @@ type EditProfileModalProps = {
   setEditEmailAddress: (value: string) => void
   onClose: () => void
   onSave: () => void
+  saving?: boolean
+  saveError?: string | null
+  fieldErrors?: Record<string, string>
 }
+
+import { useEffect } from 'react'
 
 export default function EditProfileModal({
   editAvatarUrl,
@@ -38,7 +43,15 @@ export default function EditProfileModal({
   setEditEmailAddress,
   onClose,
   onSave,
+  saving,
+  saveError,
+  fieldErrors = {},
 }: EditProfileModalProps) {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
+
   return (
     <div className="edit-modal">
       <button className="edit-modal__backdrop" type="button" aria-label="Закрыть" onClick={onClose} />
@@ -173,6 +186,15 @@ export default function EditProfileModal({
             {editTechList.map((tech) => (
               <span className="edit-tech__chip" key={tech}>
                 {tech}
+                <button
+                  type="button"
+                  className="edit-tech__remove"
+                  aria-label={`Удалить ${tech}`}
+                  onClick={() => setEditTechList((prev) => prev.filter((t) => t !== tech))}
+                  style={{ marginLeft: '6px', background: 'none', border: 'none', cursor: 'pointer', color: '#696E82', fontSize: '14px', padding: '0 2px', lineHeight: 1 }}
+                >
+                  x
+                </button>
               </span>
             ))}
           </div>
@@ -181,33 +203,47 @@ export default function EditProfileModal({
         <div className="edit-modal__section">
           <span className="edit-modal__label">Контакты</span>
           <div className="edit-contacts">
-            <input
-              className="edit-contacts__input"
-              placeholder="Ссылка на GitHub (https://github.com/username)"
-              value={editGithubUrl}
-              onChange={(event) => setEditGithubUrl(event.target.value)}
-            />
-            <input
-              className="edit-contacts__input"
-              placeholder="Telegram (@username или https://t.me/username)"
-              value={editTelegramUrl}
-              onChange={(event) => setEditTelegramUrl(event.target.value)}
-            />
-            <input
-              className="edit-contacts__input"
-              placeholder="Почта (name@example.com)"
-              value={editEmailAddress}
-              onChange={(event) => setEditEmailAddress(event.target.value)}
-            />
+            <div>
+              <input
+                className="edit-contacts__input"
+                placeholder="Ссылка на GitHub (https://github.com/username)"
+                value={editGithubUrl}
+                onChange={(event) => setEditGithubUrl(event.target.value)}
+                style={fieldErrors.github ? { borderColor: '#e53935' } : undefined}
+              />
+              {fieldErrors.github && <span style={{ color: '#e53935', fontSize: '12px', display: 'block', marginTop: '4px' }}>{fieldErrors.github}</span>}
+            </div>
+            <div>
+              <input
+                className="edit-contacts__input"
+                placeholder="Telegram (@username или https://t.me/username)"
+                value={editTelegramUrl}
+                onChange={(event) => setEditTelegramUrl(event.target.value)}
+                style={fieldErrors.telegram ? { borderColor: '#e53935' } : undefined}
+              />
+              {fieldErrors.telegram && <span style={{ color: '#e53935', fontSize: '12px', display: 'block', marginTop: '4px' }}>{fieldErrors.telegram}</span>}
+            </div>
+            <div>
+              <input
+                className="edit-contacts__input"
+                placeholder="Почта (name@example.com)"
+                value={editEmailAddress}
+                onChange={(event) => setEditEmailAddress(event.target.value)}
+                style={fieldErrors.email ? { borderColor: '#e53935' } : undefined}
+              />
+              {fieldErrors.email && <span style={{ color: '#e53935', fontSize: '12px', display: 'block', marginTop: '4px' }}>{fieldErrors.email}</span>}
+            </div>
           </div>
         </div>
+
+        {saveError && <p style={{ color: '#e53935', fontSize: '14px', margin: '0 24px 8px' }}>{saveError}</p>}
 
         <div className="edit-modal__actions">
           <button className="edit-action edit-action--ghost" type="button" onClick={onClose}>
             Отменить
           </button>
-          <button className="edit-action edit-action--primary" type="button" onClick={onSave}>
-            Сохранить
+          <button className="edit-action edit-action--primary" type="button" onClick={onSave} disabled={saving}>
+            {saving ? 'Сохранение...' : 'Сохранить'}
           </button>
         </div>
       </div>

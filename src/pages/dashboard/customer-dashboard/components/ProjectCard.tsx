@@ -60,15 +60,15 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         <div className="project-metrics">
           <div className="project-metric">
             <span className="project-metric__label">Бюджет общий</span>
-            <span className="project-metric__value">1 000 000 ₽</span>
+            <span className="project-metric__value">{project.totalBudget ?? '—'}</span>
           </div>
           <div className="project-metric">
             <span className="project-metric__label">Бюджет потраченный</span>
-            <span className="project-metric__value">420 000 ₽</span>
+            <span className="project-metric__value">{project.spentBudget ?? '0 ₽'}</span>
           </div>
           <div className="project-metric">
             <span className="project-metric__label">Кол-во откликов</span>
-            <span className="project-metric__value">14</span>
+            <span className="project-metric__value">{project.responsesCount ?? 0}</span>
           </div>
           <div className="project-metric">
             <span className="project-metric__label">Завершение</span>

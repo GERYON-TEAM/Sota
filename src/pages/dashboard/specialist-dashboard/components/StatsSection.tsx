@@ -3,11 +3,26 @@ import RatingDots from '../../../../shared/ui/color-dots/RatingDots'
 import ActivityCard from './ActivityCard'
 import LevelCard from './LevelCard'
 import StatCard from './StatCard'
+import { useAuth } from '../../../../shared/auth/useAuth'
+import type { DashboardStats } from '../api/specialistDashboard.mapper'
 
-export default function StatsSection() {
+type Props = {
+  stats?: DashboardStats | null
+}
+
+export default function StatsSection({ stats }: Props) {
+  const { user } = useAuth()
   const [periodOpen, setPeriodOpen] = useState(false)
   const [periodValue, setPeriodValue] = useState('за все время')
   const periods = ['за все время', 'за месяц', 'за неделю']
+
+  const name = user?.firstName ?? ''
+  const rawLevel = stats?.profile.level ?? 'junior'
+  const level = rawLevel.charAt(0).toUpperCase() + rawLevel.slice(1)
+  const levelProgress = stats?.profile.levelProgressPercent ?? 0
+  const rating = stats?.profile.rating ?? 0
+  const totalReviews = stats?.profile.totalReviews ?? 0
+  const completedProjects = stats?.profile.totalCompletedProjects ?? 0
 
   return (
     <section className="stats-card">
@@ -16,7 +31,7 @@ export default function StatsSection() {
           <div className="stats-avatar" aria-hidden="true" />
           <div className="stats-user-text">
             <span className="stats-greeting">Привет,</span>
-            <span className="stats-name">Алина</span>
+            <span className="stats-name">{name}</span>
           </div>
         </div>
         <button
@@ -31,22 +46,22 @@ export default function StatsSection() {
       </div>
 
       <div className="stats-grid">
-        <LevelCard status="Middle" progressText="10% до нового уровня." steps={10} activeIndex={9} />
+        <LevelCard status={level} progressText={`${levelProgress}% до нового уровня.`} steps={10} activeIndex={Math.round(levelProgress / 10)} />
 
         <StatCard
           title="Рейтинг"
           headRight={<RatingDots />}
-          value="4,8"
+          value={rating.toFixed(1).replace('.', ',')}
           meta={
             <>
-              отзывы: <span className="stat-accent">24</span>
+              отзывы: <span className="stat-accent">{totalReviews}</span>
             </>
           }
         />
 
         <StatCard
           title="Завершенные проекты"
-          value="20"
+          value={String(completedProjects)}
           metaRow
           meta={
             <>
@@ -95,7 +110,7 @@ export default function StatsSection() {
           }
         />
 
-        <StatCard title="Общий опыт" value="2" meta="года" />
+        <StatCard title="Общий опыт" value="—" meta="" />
 
         <ActivityCard />
       </div>

@@ -1,7 +1,14 @@
-import RatingDots from '../../../shared/ui/color-dots/RatingDots'
 import SelectCheckIcon from '../ui/SelectCheckIcon'
 
+type ReviewData = {
+  id: string
+  rating: number
+  text: string
+  date: string
+}
+
 type ReviewsSectionProps = {
+  reviews?: ReviewData[]
   ratingOpen: boolean
   setRatingOpen: (value: boolean | ((prev: boolean) => boolean)) => void
   ratingValue: 'high' | 'low'
@@ -17,6 +24,7 @@ type ReviewsSectionProps = {
 }
 
 export default function ReviewsSection({
+  reviews = [],
   ratingOpen,
   setRatingOpen,
   ratingValue,
@@ -35,7 +43,7 @@ export default function ReviewsSection({
       <div className="portfolio-reviews-bar">
         <div className="portfolio-reviews">
           <span className="portfolio-section-title">Отзывы</span>
-          <span className="portfolio-reviews__count">1</span>
+          <span className="portfolio-reviews__count">{reviews.length}</span>
         </div>
 
         <div className="portfolio-filters">
@@ -226,39 +234,30 @@ export default function ReviewsSection({
         </div>
       </div>
 
-      <div className="portfolio-review-card">
-        <div className="review-card__head">
-          <span>Название проекта</span>
-          <span className="review-count">5</span>
-        </div>
-
-        <div className="review-card__body">
-          <div className="review-frame">
-            <div className="lead-card lead-card--plain">
-              <div className="lead-avatar" aria-hidden="true" />
-              <div className="lead-text">
-                <span className="lead-role">Tech Lead</span>
-                <span className="lead-name">Нестеров Ярослав</span>
-              </div>
-              <RatingDots className="lead-dots" />
+      {reviews.length > 0 ? (
+        reviews.map((review) => (
+          <div className="portfolio-review-card" key={review.id}>
+            <div className="review-card__head">
+              <span>Отзыв</span>
+              <span className="review-count">{review.rating}</span>
             </div>
 
-            <p className="review-text">
-              Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget
-              dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes,
-              nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis,
-              sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec,
-              vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo.
-              Nullam dictum felis eu pede mollis pretium. Integer tincidunt.
-            </p>
-          </div>
-        </div>
+            <div className="review-card__body">
+              <div className="review-frame">
+                <p className="review-text">{review.text}</p>
+              </div>
+            </div>
 
-        <div className="review-card__footer">
-          <div className="project-role">Junior Backend Developer</div>
-          <div className="review-pill review-pill--date">01.01.2026</div>
-        </div>
-      </div>
+            <div className="review-card__footer">
+              <div className="review-pill review-pill--date">
+                {review.date ? new Date(review.date).toLocaleDateString('ru-RU') : ''}
+              </div>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p style={{ color: '#696E82', textAlign: 'center', padding: '24px 0' }}>Пока нет отзывов</p>
+      )}
     </>
   )
 }

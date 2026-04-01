@@ -18,7 +18,7 @@ type DashboardPublishNotice = {
 export default function CustomerDashboardPage() {
   const hasNotifications = true
   const [publishNotice, setPublishNotice] = useState<DashboardPublishNotice | null>(null)
-  const { projects, loading, error } = useCustomerDashboardData()
+  const { projects, totalProjects, totalInvested, loading, error } = useCustomerDashboardData()
 
   const { bellOpen, setBellOpen } = useDashboardDropdowns()
 
@@ -79,7 +79,7 @@ export default function CustomerDashboardPage() {
         )}
 
         <div className="dashboard-surface">
-          <CustomerStatsSection />
+          <CustomerStatsSection totalProjects={totalProjects} totalInvested={totalInvested} />
 
           {loading ? (
             <p style={{ textAlign: 'center', padding: '40px 0' }}>Загрузка...</p>

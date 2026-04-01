@@ -9,6 +9,10 @@ type ProfileCardProps = {
   normalizedEmailUrl: string
   onEdit: () => void
   onShare: () => void
+  name?: string
+  level?: string
+  rating?: number
+  totalReviews?: number
 }
 
 export default function ProfileCard({
@@ -20,6 +24,10 @@ export default function ProfileCard({
   normalizedEmailUrl,
   onEdit,
   onShare,
+  name = '',
+  level = 'Junior',
+  rating = 0,
+  totalReviews = 0,
 }: ProfileCardProps) {
   return (
     <section className="portfolio-stats">
@@ -31,8 +39,8 @@ export default function ProfileCard({
             style={avatarUrl ? { backgroundImage: `url(${avatarUrl})` } : undefined}
           />
           <div className="portfolio-user__text">
-            <span className="portfolio-user__name">Алина К.</span>
-            <span className="portfolio-user__level">Middle</span>
+            <span className="portfolio-user__name">{name}</span>
+            <span className="portfolio-user__level">{level}</span>
           </div>
         </div>
 
@@ -92,9 +100,9 @@ export default function ProfileCard({
             <span>Рейтинг</span>
             <RatingDots />
           </div>
-          <div className="stat-card__value">4,8</div>
+          <div className="stat-card__value">{rating.toFixed(1).replace('.', ',')}</div>
           <div className="stat-card__meta">
-            отзывы: <span className="stat-accent">24</span>
+            отзывы: <span className="stat-accent">{totalReviews}</span>
           </div>
         </div>
 

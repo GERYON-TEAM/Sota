@@ -7,6 +7,8 @@ type ProfileMainSectionProps = {
   onAvatarChange: (event: ChangeEvent<HTMLInputElement>) => void
   onRemoveAvatar: () => void
   profileDirty: boolean
+  saving?: boolean
+  saveError?: string | null
   onSave: () => void
   firstName: string
   lastName: string
@@ -21,6 +23,8 @@ export default function ProfileMainSection({
   onAvatarChange,
   onRemoveAvatar,
   profileDirty,
+  saving,
+  saveError,
   onSave,
   firstName,
   lastName,
@@ -34,7 +38,7 @@ export default function ProfileMainSection({
       <div className="profile-page__top">
         <div className="profile-page__avatar-block">
           <AvatarUpload avatarUrl={avatarUrl} onChange={onAvatarChange} />
-          <div className="profile-page__avatar-name">Имя пользователя</div>
+          <div className="profile-page__avatar-name">{firstName && lastName ? `${firstName} ${lastName}` : 'Имя пользователя'}</div>
         </div>
         <div className="profile-page__actions">
           <button className="profile-page__remove" type="button" onClick={onRemoveAvatar}>
@@ -53,12 +57,14 @@ export default function ProfileMainSection({
             className={`profile-page__save${profileDirty ? ' is-active' : ''}`}
             type="button"
             onClick={onSave}
+            disabled={saving}
           >
-            Сохранить
+            {saving ? 'Сохранение...' : 'Сохранить'}
           </button>
         </div>
       </div>
 
+      {saveError && <p style={{ color: '#e53935', fontSize: '14px', margin: '0 0 12px' }}>{saveError}</p>}
       <Field label="Фамилия" value={lastName} onChange={onLastNameChange} placeholder="Фамилия" />
       <Field label="Имя" value={firstName} onChange={onFirstNameChange} placeholder="Имя" />
       <Field

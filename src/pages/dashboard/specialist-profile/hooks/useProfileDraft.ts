@@ -5,6 +5,8 @@ import { getMe, updateProfile as updateAuthProfile } from '../../../../shared/ap
 export const useProfileDraft = () => {
   const [profileDirty, setProfileDirty] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -53,6 +55,31 @@ export const useProfileDraft = () => {
   }
 
   const saveProfile = async () => {
+    setSaveError(null)
+    const errors: Record<string, string> = {}
+
+    if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
+      errors.contactEmail = 'Некорректный email'
+    }
+    if (contactPhone) {
+      const digits = contactPhone.replace(/[^0-9]/g, '')
+      if (!/^[+\d\s\-()]+$/.test(contactPhone) || digits.length < 7) {
+        errors.contactPhone = 'Укажите номер телефона, например +7 (900) 000-00-00'
+      }
+    }
+    if (contactTelegram && !/^(@|https?:\/\/t\.me\/)/.test(contactTelegram) && !contactTelegram.startsWith('t.me/')) {
+      errors.contactTelegram = 'Укажите @username или ссылку t.me/'
+    }
+    if (contactGithub && !/^(https?:\/\/)?(www\.)?github\.com\//.test(contactGithub) && !contactGithub.startsWith('github.com/')) {
+      errors.contactGithub = 'Укажите ссылку github.com/username'
+    }
+
+    setFieldErrors(errors)
+    if (Object.keys(errors).length > 0) {
+      setSaveError('Не удалось сохранить данные. Проверьте правильность введённых данных')
+      return
+    }
+
     setSaving(true)
     try {
       await updateAuthProfile({
@@ -68,7 +95,9 @@ export const useProfileDraft = () => {
         profile_photo_url: avatarUrl || undefined,
       })
       setProfileDirty(false)
-    } catch {
+    } catch (err: unknown) {
+      const apiErr = err as { detail?: string }
+      setSaveError(apiErr.detail ?? 'Не удалось сохранить')
     } finally {
       setSaving(false)
     }
@@ -78,6 +107,8 @@ export const useProfileDraft = () => {
     profileDirty,
     setProfileDirty,
     saving,
+    saveError,
+    fieldErrors,
     loading,
     firstName,
     setFirstName,

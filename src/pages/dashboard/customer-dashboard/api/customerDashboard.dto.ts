@@ -27,3 +27,10 @@ export type ProjectListResponseDto = {
   projects: ProjectListItemDto[]
   pagination: PaginationInfoDto
 }
+
+export type PortfolioSummaryResponseDto = {
+  total_projects: number
+  total_invested: number
+  total_spent: number
+  average_budget: number
+}

@@ -1,4 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useAuth } from '../../shared/auth/useAuth'
+import { getProfile, getSkills, getRating } from '../dashboard/specialist-profile/api/specialistProfileApi'
+import { getDashboard, getMyProjects } from '../dashboard/specialist-dashboard/api/specialistDashboardApi'
+import { getPublicReviews } from './api/portfolioApi'
 import Sidebar from '../dashboard/specialist-dashboard/components/Sidebar'
 import ProfileCard from './components/ProfileCard'
 import CompletedProjectsSection from './components/CompletedProjectsSection'
@@ -20,30 +24,29 @@ import '../dashboard/specialist-dashboard/styles/index.css'
 import './styles/index.css'
 
 export default function SpecialistPortfolio() {
+  const { user } = useAuth()
   const hasInvites = true
+  const [portfolioName, setPortfolioName] = useState('')
+  const [portfolioLevel, setPortfolioLevel] = useState('Junior')
+  const [portfolioRating, setPortfolioRating] = useState(0)
+  const [portfolioReviews, setPortfolioReviews] = useState(0)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [bellOpen, setBellOpen] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
-  const [aboutText, setAboutText] = useState(
-    'Это текст про специалиста. Он может занимать 2-3 строки и его можно редактировать. Например, 2 года работы по специальности, достижения, качества.'
-  )
-  const [techList, setTechList] = useState<string[]>(['Node.js', 'React'])
+  const [aboutText, setAboutText] = useState('')
+  const [techList, setTechList] = useState<string[]>([])
   const [editAvatarUrl, setEditAvatarUrl] = useState<string | null>(null)
   const [editAboutText, setEditAboutText] = useState('')
   const [editTechInput, setEditTechInput] = useState('')
-  const [editTechList, setEditTechList] = useState<string[]>(['Node.js', 'React'])
+  const [editTechList, setEditTechList] = useState<string[]>([])
   const [isAvatarDragOver, setIsAvatarDragOver] = useState(false)
   const [isAddSkillOpen, setIsAddSkillOpen] = useState(false)
   const [dotMenuId, setDotMenuId] = useState<string | null>(null)
   const [editingSkill, setEditingSkill] = useState<{ type: 'hard' | 'soft'; index: number } | null>(
     null
   )
-  const [hardSkills, setHardSkills] = useState<Skill[]>([
-    { name: 'React', level: 'Middle', progress: 5 },
-  ])
-  const [softSkills, setSoftSkills] = useState<Skill[]>([
-    { name: 'Communication', level: 'Middle', progress: 4 },
-  ])
+  const [hardSkills, setHardSkills] = useState<Skill[]>([])
+  const [softSkills, setSoftSkills] = useState<Skill[]>([])
   const [hardSkillsPage, setHardSkillsPage] = useState(0)
   const [softSkillsPage, setSoftSkillsPage] = useState(0)
   const skillsPerPage = 3
@@ -55,24 +58,15 @@ export default function SpecialistPortfolio() {
   const [skillLevel, setSkillLevel] = useState('')
   const [progressOpen, setProgressOpen] = useState(false)
   const [progress, setProgress] = useState<number>(0)
-  const [githubUrl, setGithubUrl] = useState('github.com/alinak')
-  const [telegramUrl, setTelegramUrl] = useState('@alina_k')
-  const [emailAddress, setEmailAddress] = useState('alina@example.com')
+  const [githubUrl, setGithubUrl] = useState('')
+  const [telegramUrl, setTelegramUrl] = useState('')
+  const [emailAddress, setEmailAddress] = useState('')
   const [editGithubUrl, setEditGithubUrl] = useState('')
   const [editTelegramUrl, setEditTelegramUrl] = useState('')
   const [editEmailAddress, setEditEmailAddress] = useState('')
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false)
   const [editingGoalIndex, setEditingGoalIndex] = useState<number | null>(null)
-  const [goals, setGoals] = useState<Goal[]>([
-    {
-      title: 'Выучить Vue.js',
-      timeline: '01.01.2025 - сейчас',
-      progress: '36%',
-      description:
-        'Описание, не слишком большое, иначе сократить иначе все не влезет, а так должно быть в одну-две строки, не больше. Если текста много, то можно использовать многоточия и показывать полное описание по клику на цель.',
-      status: 'в процессе',
-    },
-  ])
+  const [goals, setGoals] = useState<Goal[]>([])
   const [newGoalTitle, setNewGoalTitle] = useState('')
   const [newGoalTimeline, setNewGoalTimeline] = useState('')
   const [newGoalProgress, setNewGoalProgress] = useState('')
@@ -95,12 +89,79 @@ export default function SpecialistPortfolio() {
   const [reviewsTypeValue, setReviewsTypeValue] = useState('Коммерческий')
   const [reviewsDateOpen, setReviewsDateOpen] = useState(false)
   const [reviewsDateValue, setReviewsDateValue] = useState<'new' | 'old'>('new')
+  const [completedProjects, setCompletedProjects] = useState<{ role: string; title: string; startDate: string; endDate: string }[]>([])
+  const [reviewsList, setReviewsList] = useState<{ id: string; rating: number; text: string; date: string }[]>([])
   const [shareOpen, setShareOpen] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
+  const [editSaving, setEditSaving] = useState(false)
+  const [editSaveError, setEditSaveError] = useState<string | null>(null)
+  const [editFieldErrors, setEditFieldErrors] = useState<Record<string, string>>({})
   const shareUrl = typeof window === 'undefined' ? '' : window.location.href
   const normalizedGithubUrl = normalizeGithub(githubUrl)
   const normalizedTelegramUrl = normalizeTelegram(telegramUrl)
   const normalizedEmailUrl = normalizeEmail(emailAddress)
+
+  useEffect(() => {
+    let active = true
+    Promise.all([getProfile(), getSkills(), getRating(), getDashboard()])
+      .then(([profileData, skillsData, ratingData, dashData]) => {
+        if (!active) return
+        const lvl = profileData.level ?? 'junior'
+        setPortfolioLevel(lvl.charAt(0).toUpperCase() + lvl.slice(1))
+        setPortfolioRating(ratingData.rating)
+        setPortfolioReviews(ratingData.total_reviews)
+        setPortfolioName(
+          user ? `${user.firstName} ${user.lastName?.charAt(0) ?? ''}.` : ''
+        )
+        setAboutText(profileData.bio ?? '')
+        setEmailAddress(profileData.contact_email ?? '')
+        setGithubUrl(profileData.github_url ?? '')
+        setTelegramUrl(profileData.telegram_handle ?? '')
+        setAvatarUrl(profileData.profile_photo_url ?? null)
+
+        const hard = skillsData.skills
+          .filter((s) => s.skill_type === 'hardskill')
+          .map((s) => ({ name: s.skill_name, level: s.proficiency >= 4 ? 'Senior' : s.proficiency >= 3 ? 'Middle' : 'Junior', progress: s.proficiency }))
+        const soft = skillsData.skills
+          .filter((s) => s.skill_type === 'softskill')
+          .map((s) => ({ name: s.skill_name, level: s.proficiency >= 4 ? 'Senior' : s.proficiency >= 3 ? 'Middle' : 'Junior', progress: s.proficiency }))
+        setHardSkills(hard)
+        setSoftSkills(soft)
+
+        const techs = skillsData.skills.map((s) => s.skill_name)
+        setTechList(techs)
+        setEditTechList(techs)
+
+        const specId = dashData.profile.id
+        getMyProjects(specId).then((res) => {
+          if (!active) return
+          setCompletedProjects(
+            res.projects
+              .filter((p) => p.status === 'completed')
+              .map((p) => ({
+                role: p.project_role,
+                title: p.project_title,
+                startDate: p.start_date ? new Date(p.start_date).toLocaleDateString('ru-RU') : '',
+                endDate: p.end_date ? new Date(p.end_date).toLocaleDateString('ru-RU') : '',
+              }))
+          )
+        }).catch(() => {})
+        getPublicReviews(specId).then((res) => {
+          if (!active) return
+          setReviewsList(
+            res.reviews.map((r) => ({
+              id: r.id,
+              rating: r.rating,
+              text: r.review_text,
+              date: r.created_at,
+            }))
+          )
+        }).catch(() => {})
+      })
+      .catch(() => {})
+      .finally(() => { void active })
+    return () => { active = false }
+  }, [user])
 
   const handleAvatarFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return
@@ -353,6 +414,10 @@ export default function SpecialistPortfolio() {
             normalizedGithubUrl={normalizedGithubUrl}
             normalizedTelegramUrl={normalizedTelegramUrl}
             normalizedEmailUrl={normalizedEmailUrl}
+            name={portfolioName}
+            level={portfolioLevel}
+            rating={portfolioRating}
+            totalReviews={portfolioReviews}
             onEdit={() => {
               setEditAvatarUrl(avatarUrl)
               setEditAboutText(aboutText)
@@ -367,6 +432,7 @@ export default function SpecialistPortfolio() {
           />
 
           <CompletedProjectsSection
+            projects={completedProjects}
             hasInvites={hasInvites}
             yearOpen={yearOpen}
             setYearOpen={setYearOpen}
@@ -440,6 +506,7 @@ export default function SpecialistPortfolio() {
             />
 
             <ReviewsSection
+              reviews={reviewsList}
               ratingOpen={ratingOpen}
               setRatingOpen={setRatingOpen}
               ratingValue={ratingValue}
@@ -477,14 +544,52 @@ export default function SpecialistPortfolio() {
           editEmailAddress={editEmailAddress}
           setEditEmailAddress={setEditEmailAddress}
           onClose={() => setIsEditOpen(false)}
-          onSave={() => {
-            setAvatarUrl(editAvatarUrl)
-            setAboutText(editAboutText)
-            setTechList(editTechList)
-            setGithubUrl(editGithubUrl)
-            setTelegramUrl(editTelegramUrl)
-            setEmailAddress(editEmailAddress)
-            setIsEditOpen(false)
+          saving={editSaving}
+          saveError={editSaveError}
+          fieldErrors={editFieldErrors}
+          onSave={async () => {
+            setEditSaveError(null)
+            const fe: Record<string, string> = {}
+            if (editEmailAddress && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editEmailAddress)) {
+              fe.email = 'Некорректный email'
+            }
+            if (editTelegramUrl && !/^(@|https?:\/\/t\.me\/)/.test(editTelegramUrl) && !editTelegramUrl.startsWith('t.me/')) {
+              fe.telegram = 'Укажите @username или ссылку t.me/'
+            }
+            if (editGithubUrl && !/^(https?:\/\/)?(www\.)?github\.com\//.test(editGithubUrl) && !editGithubUrl.startsWith('github.com/')) {
+              fe.github = 'Укажите ссылку github.com/username'
+            }
+            setEditFieldErrors(fe)
+            if (Object.keys(fe).length > 0) {
+              setEditSaveError('Не удалось сохранить данные. Проверьте правильность введённых данных')
+              return
+            }
+
+            setEditSaving(true)
+            try {
+              const { updateProfile } = await import('../dashboard/specialist-profile/api/specialistProfileApi')
+              await updateProfile({
+                bio: editAboutText || undefined,
+                contact_email: editEmailAddress || undefined,
+                telegram_handle: editTelegramUrl || undefined,
+                github_url: editGithubUrl || undefined,
+                profile_photo_url: editAvatarUrl || undefined,
+              })
+              setAvatarUrl(editAvatarUrl)
+              setAboutText(editAboutText)
+              setTechList(editTechList)
+              setGithubUrl(editGithubUrl)
+              setTelegramUrl(editTelegramUrl)
+              setEmailAddress(editEmailAddress)
+              setEditSaveError(null)
+              setEditFieldErrors({})
+              setIsEditOpen(false)
+            } catch (err: unknown) {
+              const apiErr = err as { detail?: string }
+              setEditSaveError(apiErr.detail ?? 'Не удалось сохранить')
+            } finally {
+              setEditSaving(false)
+            }
           }}
         />
       )}

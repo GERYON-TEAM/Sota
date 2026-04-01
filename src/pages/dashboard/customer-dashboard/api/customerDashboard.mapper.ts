@@ -24,5 +24,8 @@ export function mapProjectToActive(dto: ProjectListItemDto): ActiveProject {
     progress: dto.progress_percent,
     leadName: '',
     leadRole: '',
+    totalBudget: dto.total_budget ? `${dto.total_budget.toLocaleString('ru-RU')} ₽` : '—',
+    spentBudget: dto.spent_budget ? `${dto.spent_budget.toLocaleString('ru-RU')} ₽` : '0 ₽',
+    responsesCount: dto.responses_count,
   }
 }

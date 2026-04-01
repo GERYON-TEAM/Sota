@@ -4,6 +4,9 @@ import StackChips from '../ui/StackChips'
 
 type ProfileStackSectionProps = {
   profileDirty: boolean
+  saving?: boolean
+  saveError?: string | null
+  fieldErrors?: Record<string, string>
   onSave: () => void
   aboutExperience: string
   aboutBio: string
@@ -32,6 +35,9 @@ type ProfileStackSectionProps = {
 
 export default function ProfileStackSection({
   profileDirty,
+  saving,
+  saveError,
+  fieldErrors = {},
   onSave,
   aboutExperience,
   aboutBio,
@@ -70,10 +76,12 @@ export default function ProfileStackSection({
           className={`profile-page__save${profileDirty ? ' is-active' : ''}`}
           type="button"
           onClick={onSave}
+          disabled={saving}
         >
-          Сохранить
+          {saving ? 'Сохранение...' : 'Сохранить'}
         </button>
       </div>
+      {saveError && <p style={{ color: '#e53935', fontSize: '14px', margin: '0 0 12px' }}>{saveError}</p>}
 
       {!hideExperienceField && (
         <Field
@@ -115,8 +123,9 @@ export default function ProfileStackSection({
         label="Телефон"
         value={contactPhone}
         onChange={onContactPhoneChange}
-        placeholder="Телефон (любой формат)"
         type="tel"
+        mask="phone"
+        error={fieldErrors.contactPhone}
       />
       <Field
         label="Почта"
@@ -124,6 +133,7 @@ export default function ProfileStackSection({
         onChange={onContactEmailChange}
         placeholder="Почта"
         type="email"
+        error={fieldErrors.contactEmail}
       />
       <Field
         label="Telegram"
@@ -131,6 +141,7 @@ export default function ProfileStackSection({
         onChange={onContactTelegramChange}
         placeholder="Ссылка на Telegram"
         type="url"
+        error={fieldErrors.contactTelegram}
       />
       {!hideGithubField && (
         <Field
@@ -139,6 +150,7 @@ export default function ProfileStackSection({
           onChange={onContactGithubChange}
           placeholder="Ссылка на GitHub"
           type="url"
+          error={fieldErrors.contactGithub}
         />
       )}
     </div>

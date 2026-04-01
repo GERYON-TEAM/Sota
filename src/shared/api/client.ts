@@ -75,7 +75,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     let detail = 'Произошла ошибка'
     try {
       const body = await response.json()
-      detail = body.detail ?? detail
+      if (typeof body.detail === 'string') {
+        detail = body.detail
+      } else if (Array.isArray(body.detail)) {
+        detail = body.detail.map((e: { msg?: string }) => e.msg ?? '').filter(Boolean).join('; ') || detail
+      }
     } catch {
       // ignore
     }

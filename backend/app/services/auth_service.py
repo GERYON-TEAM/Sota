@@ -238,7 +238,7 @@ class AuthService:
 
         if user.two_factor_secret:
             totp = pyotp.TOTP(user.two_factor_secret)
-            if totp.verify(code, valid_window=1):
+            if totp.verify(code, valid_window=2):
                 code_valid = True
 
         if not code_valid:
@@ -298,6 +298,14 @@ class AuthService:
             "refresh_token": refresh_token,
             "token_type": "Bearer",
             "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            "user": {
+                "id": str(user.id),
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "role": user.role,
+                "level": user.level,
+            },
         }
 
     async def logout(self, user, access_token: str, ip_address: str = None, user_agent: str = None):
@@ -455,7 +463,7 @@ class AuthService:
             raise ConflictError(detail="2FA уже включена")
 
         if not verify_password(password, user.password_hash):
-            raise AuthenticationError(detail="Неверный пароль")
+            raise ForbiddenError(detail="Неверный пароль")
 
         secret = pyotp.random_base32()
         totp = pyotp.TOTP(secret)
@@ -507,7 +515,7 @@ class AuthService:
         secret = setup_data["secret"]
 
         totp = pyotp.TOTP(secret)
-        if not totp.verify(code, valid_window=1):
+        if not totp.verify(code, valid_window=2):
             raise ForbiddenError(detail="Неверный код 2FA")
 
         await self.user_repo.update(user.id, {
@@ -845,7 +853,7 @@ class AuthService:
             raise ForbiddenError(detail="Аккаунт заблокирован")
 
         if not verify_password(data.old_password, user.password_hash):
-            raise AuthenticationError(detail="Неверный текущий пароль")
+            raise ForbiddenError(detail="Неверный текущий пароль")
 
         self._validate_password(data.new_password)
 

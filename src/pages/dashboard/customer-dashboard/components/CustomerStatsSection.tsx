@@ -3,7 +3,15 @@ import CustomerActivityCard from './CustomerActivityCard'
 import CustomerLevelCard from './CustomerLevelCard'
 import CustomerStatCard from './CustomerStatCard'
 
-export default function CustomerStatsSection() {
+import { useAuth } from '../../../../shared/auth/useAuth'
+
+type Props = {
+  totalProjects?: number
+  totalInvested?: number
+}
+
+export default function CustomerStatsSection({ totalProjects = 0, totalInvested = 0 }: Props) {
+  const { user } = useAuth()
   const [projectsPeriodOpen, setProjectsPeriodOpen] = useState(false)
   const [projectsPeriodValue, setProjectsPeriodValue] = useState('за все время')
   const [periodOpen, setPeriodOpen] = useState(false)
@@ -21,7 +29,7 @@ export default function CustomerStatsSection() {
           <div className="stats-avatar" aria-hidden="true" />
           <div className="stats-user-text">
             <span className="stats-greeting">Привет,</span>
-            <span className="stats-name">Алина</span>
+            <span className="stats-name">{user?.firstName ?? ''}</span>
           </div>
         </div>
         <button
@@ -37,7 +45,7 @@ export default function CustomerStatsSection() {
 
       <div className="stats-grid">
         <CustomerLevelCard
-          status="20"
+          status={String(totalProjects)}
           periodValue={projectsPeriodValue}
           periodOpen={projectsPeriodOpen}
           options={periods}
@@ -50,7 +58,7 @@ export default function CustomerStatsSection() {
 
         <CustomerStatCard
           title="Всего инвестировано"
-          value="1 000 000₽"
+          value={`${totalInvested.toLocaleString('ru-RU')}₽`}
           metaRow
           meta={
             <>

@@ -1,7 +1,14 @@
-import RatingDots from '../../../shared/ui/color-dots/RatingDots'
 import SelectCheckIcon from '../ui/SelectCheckIcon'
 
+type CompletedProject = {
+  role: string
+  title: string
+  startDate: string
+  endDate: string
+}
+
 type CompletedProjectsSectionProps = {
+  projects?: CompletedProject[]
   hasInvites: boolean
   yearOpen: boolean
   setYearOpen: (value: boolean | ((prev: boolean) => boolean)) => void
@@ -18,7 +25,7 @@ type CompletedProjectsSectionProps = {
 }
 
 export default function CompletedProjectsSection({
-  hasInvites,
+  projects = [],
   yearOpen,
   setYearOpen,
   yearValue,
@@ -44,7 +51,7 @@ export default function CompletedProjectsSection({
             <h2 className="portfolio-section-title">Завершенные проекты</h2>
 
             <span className="portfolio-count">
-              <span>1</span>
+              <span>{projects.length}</span>
             </span>
           </div>
 
@@ -235,89 +242,49 @@ export default function CompletedProjectsSection({
       </section>
 
       <section className="active-projects-list">
-        {hasInvites ? (
-          <div className="project-frame">
-            <div className="project-card">
-              <div className="project-card__top">
-                <div className="project-role">Junior Backend Developer</div>
-                <button
-                  className="project-link"
-                  type="button"
-                  aria-label="Открыть проект"
-                  onClick={openCompletedProject}
-                >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+        {projects.length > 0 ? (
+          projects.map((project, index) => (
+            <div className="project-frame" key={index}>
+              <div className="project-card">
+                <div className="project-card__top">
+                  <div className="project-role">{project.role}</div>
+                  <button
+                    className="project-link"
+                    type="button"
+                    aria-label="Открыть проект"
+                    onClick={openCompletedProject}
                   >
-                    <g clipPath="url(#clip0_22_105)">
-                      <path
-                        d="M18.5322 6.64453C18.5322 6.37937 18.4268 6.12508 18.2393 5.93758C18.0518 5.75008 17.7975 5.64473 17.5324 5.64469L9.53217 5.64469C9.39941 5.64238 9.26752 5.66653 9.14419 5.71575C9.02086 5.76496 8.90857 5.83824 8.81386 5.93131C8.71916 6.02438 8.64394 6.13539 8.59259 6.25784C8.54124 6.3803 8.5148 6.51175 8.5148 6.64453C8.5148 6.77732 8.54124 6.90877 8.59259 7.03123C8.64394 7.15368 8.71916 7.26469 8.81386 7.35776C8.90857 7.45083 9.02086 7.52411 9.14419 7.57332C9.26752 7.62253 9.39941 7.64669 9.53217 7.64438L15.1183 7.64438L5.7541 17.0086C5.56657 17.1961 5.46121 17.4505 5.46121 17.7157C5.46121 17.9809 5.56657 18.2353 5.7541 18.4228C5.94164 18.6103 6.19599 18.7157 6.46121 18.7157C6.72643 18.7157 6.98078 18.6103 7.16832 18.4228L16.5325 9.0586L16.5325 14.6447C16.5371 14.9069 16.6444 15.1568 16.8314 15.3406C17.0185 15.5244 17.2702 15.6274 17.5324 15.6274C17.7946 15.6274 18.0463 15.5244 18.2333 15.3406C18.4203 15.1568 18.5277 14.9069 18.5322 14.6447L18.5322 6.64453Z"
-                        fill="#696E82"
-                      />
-                    </g>
-                    <defs>
-                      <clipPath id="clip0_22_105">
-                        <rect width="24" height="24" fill="white" />
-                      </clipPath>
-                    </defs>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <g clipPath="url(#clip0_completed)">
+                        <path d="M18.5322 6.64453C18.5322 6.37937 18.4268 6.12508 18.2393 5.93758C18.0518 5.75008 17.7975 5.64473 17.5324 5.64469L9.53217 5.64469C9.39941 5.64238 9.26752 5.66653 9.14419 5.71575C9.02086 5.76496 8.90857 5.83824 8.81386 5.93131C8.71916 6.02438 8.64394 6.13539 8.59259 6.25784C8.54124 6.3803 8.5148 6.51175 8.5148 6.64453C8.5148 6.77732 8.54124 6.90877 8.59259 7.03123C8.64394 7.15368 8.71916 7.26469 8.81386 7.35776C8.90857 7.45083 9.02086 7.52411 9.14419 7.57332C9.26752 7.62253 9.39941 7.64669 9.53217 7.64438L15.1183 7.64438L5.7541 17.0086C5.56657 17.1961 5.46121 17.4505 5.46121 17.7157C5.46121 17.9809 5.56657 18.2353 5.7541 18.4228C5.94164 18.6103 6.19599 18.7157 6.46121 18.7157C6.72643 18.7157 6.98078 18.6103 7.16832 18.4228L16.5325 9.0586L16.5325 14.6447C16.5371 14.9069 16.6444 15.1568 16.8314 15.3406C17.0185 15.5244 17.2702 15.6274 17.5324 15.6274C17.7946 15.6274 18.0463 15.5244 18.2333 15.3406C18.4203 15.1568 18.5277 14.9069 18.5322 14.6447L18.5322 6.64453Z" fill="#696E82" />
+                      </g>
+                      <defs><clipPath id="clip0_completed"><rect width="24" height="24" fill="white" /></clipPath></defs>
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="project-title">{project.title}</div>
+
+                <div className="project-dates">
+                  <div className="project-date-card">
+                    <span>Начало</span>
+                    <span>{project.startDate || '—'}</span>
+                  </div>
+                  <div className="project-date-card">
+                    <span>Окончание</span>
+                    <span>{project.endDate || '—'}</span>
+                  </div>
+                </div>
+
+                <button className="project-results" type="button" onClick={openCompletedProject}>
+                  <span>Посмотреть результаты</span>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M18.5322 6.64356C18.5322 6.37839 18.4268 6.1241 18.2393 5.9366C18.0518 5.7491 17.7975 5.64375 17.5324 5.64371L9.53217 5.64371C9.39941 5.6414 9.26752 5.66556 9.14419 5.71477C9.02086 5.76398 8.90857 5.83726 8.81386 5.93033C8.71916 6.02341 8.64394 6.13441 8.59259 6.25686C8.54124 6.37932 8.5148 6.51077 8.5148 6.64356C8.5148 6.77634 8.54124 6.9078 8.59259 7.03025C8.64394 7.15271 8.71916 7.26371 8.81386 7.35678C8.90857 7.44986 9.02086 7.52314 9.14419 7.57235C9.26752 7.62156 9.39941 7.64571 9.53217 7.64341L15.1183 7.64341L5.7541 17.0076C5.56657 17.1952 5.46121 17.4495 5.46121 17.7147C5.46121 17.9799 5.56657 18.2343 5.7541 18.4218C5.94164 18.6094 6.19599 18.7147 6.46121 18.7147C6.72643 18.7147 6.98078 18.6094 7.16832 18.4218L16.5325 9.05762L16.5325 14.6438C16.5371 14.9059 16.6444 15.1558 16.8314 15.3396C17.0185 15.5234 17.2702 15.6264 17.5324 15.6264C17.7946 15.6264 18.0463 15.5234 18.2333 15.3396C18.4203 15.1558 18.5277 14.9059 18.5322 14.6438L18.5322 6.64356Z" fill="#696E82" />
                   </svg>
                 </button>
               </div>
-
-              <div className="project-title">Название проекта</div>
-
-              <div className="task-card">
-                <div className="task-card__head">
-                  <span>Отзыв Tech Lead</span>
-                  <span className="task-date">25.02.2026</span>
-                </div>
-
-                <div className="project-review">
-                  Отзыв от Tech Lead, может занимать 2-3 строки. Кратко и по содержанию или с использованием многоточия, если текста м...
-                </div>
-                <div className="lead-card lead-card--plain">
-                  <div className="lead-avatar" aria-hidden="true" />
-                  <div className="lead-text">
-                    <span className="lead-role">Tech Lead</span>
-                    <span className="lead-name">Нестеров Ярослав</span>
-                  </div>
-                  <RatingDots className="lead-dots" />
-                </div>
-              </div>
-
-              <div className="project-dates">
-                <div className="project-date-card">
-                  <span>Окончание</span>
-                  <span>01.01.2026</span>
-                </div>
-                <div className="project-date-card">
-                  <span>Окончание</span>
-                  <span>01.01.2026</span>
-                </div>
-              </div>
-
-              <button className="project-results" type="button" onClick={openCompletedProject}>
-                <span>Посмотреть результаты</span>
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M18.5322 6.64356C18.5322 6.37839 18.4268 6.1241 18.2393 5.9366C18.0518 5.7491 17.7975 5.64375 17.5324 5.64371L9.53217 5.64371C9.39941 5.6414 9.26752 5.66556 9.14419 5.71477C9.02086 5.76398 8.90857 5.83726 8.81386 5.93033C8.71916 6.02341 8.64394 6.13441 8.59259 6.25686C8.54124 6.37932 8.5148 6.51077 8.5148 6.64356C8.5148 6.77634 8.54124 6.9078 8.59259 7.03025C8.64394 7.15271 8.71916 7.26371 8.81386 7.35678C8.90857 7.44986 9.02086 7.52314 9.14419 7.57235C9.26752 7.62156 9.39941 7.64571 9.53217 7.64341L15.1183 7.64341L5.7541 17.0076C5.56657 17.1952 5.46121 17.4495 5.46121 17.7147C5.46121 17.9799 5.56657 18.2343 5.7541 18.4218C5.94164 18.6094 6.19599 18.7147 6.46121 18.7147C6.72643 18.7147 6.98078 18.6094 7.16832 18.4218L16.5325 9.05762L16.5325 14.6438C16.5371 14.9059 16.6444 15.1558 16.8314 15.3396C17.0185 15.5234 17.2702 15.6264 17.5324 15.6264C17.7946 15.6264 18.0463 15.5234 18.2333 15.3396C18.4203 15.1558 18.5277 14.9059 18.5322 14.6438L18.5322 6.64356Z"
-                    fill="#696E82"
-                  />
-                </svg>
-              </button>
             </div>
-          </div>
+          ))
         ) : (
           <div className="project-empty">
             <svg

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Sidebar from '../specialist-dashboard/components/Sidebar'
 import HeaderBar from '../specialist-dashboard/components/HeaderBar'
 import '../specialist-dashboard/styles/index.css'
@@ -10,11 +10,23 @@ import ProfileTabs from './components/ProfileTabs'
 import ProfilePanel from './components/ProfilePanel'
 import EditFieldModal from './components/modals/EditFieldModal'
 import ConfirmModal from './components/modals/ConfirmModal'
-import { changePassword } from '../../../shared/api/authApi'
+import TwoFactorModal from './components/modals/TwoFactorModal'
+import { changePassword, getMe } from '../../../shared/api/authApi'
 
 export default function ProfilePage() {
   const [bellOpen, setBellOpen] = useState(false)
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
+  const [twoFactorModalOpen, setTwoFactorModalOpen] = useState(false)
+  const [twoFactorMode, setTwoFactorMode] = useState<'enable' | 'disable'>('enable')
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true)
+
+  useEffect(() => {
+    getMe().then((data) => {
+      if ((data as Record<string, unknown>).two_factor_enabled) {
+        setTwoFactorEnabled(true)
+      }
+    }).catch(() => {})
+  }, [])
   const [passwordModalOpen, setPasswordModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [currentPassword, setCurrentPassword] = useState('')
@@ -29,12 +41,28 @@ export default function ProfilePage() {
 
   const handleSavePassword = async () => {
     setPasswordError('')
+    if (!currentPassword) {
+      setPasswordError('Введите текущий пароль')
+      return
+    }
     if (newPassword !== confirmPassword) {
       setPasswordError('Пароли не совпадают')
       return
     }
     if (newPassword.length < 8) {
       setPasswordError('Минимум 8 символов')
+      return
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      setPasswordError('Нужна хотя бы одна заглавная буква')
+      return
+    }
+    if (!/[0-9]/.test(newPassword)) {
+      setPasswordError('Нужна хотя бы одна цифра')
+      return
+    }
+    if (!/[^A-Za-z0-9]/.test(newPassword)) {
+      setPasswordError('Нужен хотя бы один спецсимвол')
       return
     }
     setPasswordSaving(true)
@@ -109,9 +137,17 @@ export default function ProfilePage() {
                   draft.setProfileDirty(true)
                 }}
                 twoFactorEnabled={twoFactorEnabled}
-                onToggleTwoFactor={() => setTwoFactorEnabled((prev) => !prev)}
+                onToggleTwoFactor={() => {
+                  setTwoFactorMode(twoFactorEnabled ? 'disable' : 'enable')
+                  setTwoFactorModalOpen(true)
+                }}
                 onOpenPasswordModal={() => setPasswordModalOpen(true)}
                 onOpenDeleteModal={() => setDeleteModalOpen(true)}
+                notificationsEnabled={notificationsEnabled}
+                onToggleNotifications={() => setNotificationsEnabled((prev) => !prev)}
+                saving={draft.saving}
+                saveError={draft.saveError}
+                fieldErrors={draft.fieldErrors}
                 aboutExperience={draft.aboutExperience}
                 aboutBio={draft.aboutBio}
                 aboutStack={draft.aboutStack}
@@ -182,6 +218,13 @@ export default function ProfilePage() {
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
         onConfirm={() => setDeleteModalOpen(false)}
+      />
+
+      <TwoFactorModal
+        isOpen={twoFactorModalOpen}
+        mode={twoFactorMode}
+        onClose={() => setTwoFactorModalOpen(false)}
+        onSuccess={() => setTwoFactorEnabled((prev) => !prev)}
       />
     </div>
   )

@@ -9,6 +9,9 @@ export type ActiveProject = {
   progress: number
   leadName: string
   leadRole: string
+  totalBudget?: string
+  spentBudget?: string
+  responsesCount?: number
 }
 
 export type Invite = {

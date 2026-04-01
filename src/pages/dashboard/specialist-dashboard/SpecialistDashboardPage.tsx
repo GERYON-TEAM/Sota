@@ -9,7 +9,7 @@ import { useSpecialistDashboardData } from './hooks/useSpecialistDashboardData'
 
 export default function SpecialistDashboardPage() {
   const hasNotifications = true
-  const { projects, invites, loading, error } = useSpecialistDashboardData()
+  const { stats, projects, invites, loading, error } = useSpecialistDashboardData()
 
   const {
     deadlineOpen,
@@ -63,7 +63,7 @@ export default function SpecialistDashboardPage() {
         />
 
         <div className="dashboard-surface">
-          <StatsSection />
+          <StatsSection stats={stats} />
 
           <ActiveProjectsSection
             projects={projects}
