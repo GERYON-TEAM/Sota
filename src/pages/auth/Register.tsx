@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useAuth } from '../../shared/auth/useAuth'
 import Logo from '../../shared/ui/logo/Logo'
 import AuthShape from '../../shared/ui/auth-shape/AuthShape'
 import EyeIcon from '../../shared/ui/eye-icon/EyeIcon'
@@ -6,36 +7,80 @@ import './login.css'
 import './register.css'
 
 export default function Register() {
+  const { register } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
-  const [step, setStep] = useState<1 | 2 | 3>(1)
+  const [step, setStep] = useState<1 | 2>(1)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [middleName, setMiddleName] = useState('')
   const [role, setRole] = useState('')
   const [roleOpen, setRoleOpen] = useState(false)
+  const [level, setLevel] = useState('')
+  const [levelOpen, setLevelOpen] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const roleRef = useRef<HTMLDivElement | null>(null)
+  const levelRef = useRef<HTMLDivElement | null>(null)
+  const isSpecialist = role === 'Специалист'
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
   const isPasswordValid = password.trim().length > 0
   const isConfirmValid = confirmPassword.trim().length > 0 && confirmPassword === password
 
   useEffect(() => {
-    if (!roleOpen) return
+    if (!roleOpen && !levelOpen) return
     const handleClickOutside = (event: MouseEvent) => {
-      if (!roleRef.current) return
-      if (!roleRef.current.contains(event.target as Node)) {
+      if (roleOpen && roleRef.current && !roleRef.current.contains(event.target as Node)) {
         setRoleOpen(false)
+      }
+      if (levelOpen && levelRef.current && !levelRef.current.contains(event.target as Node)) {
+        setLevelOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [roleOpen])
+  }, [roleOpen, levelOpen])
 
   useEffect(() => {
     if (role) {
       setRoleOpen(false)
     }
   }, [role])
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setError('')
+
+    if (step === 1) {
+      if (!isEmailValid || !isPasswordValid || !isConfirmValid) return
+      setStep(2)
+      return
+    }
+
+    if (!lastName.trim() || !firstName.trim() || !role) return
+    if (isSpecialist && !level) return
+
+    setLoading(true)
+    try {
+      await register({
+        email: email.trim(),
+        password,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        middleName: middleName.trim() || undefined,
+        role,
+        level: isSpecialist ? level : undefined,
+      })
+      window.location.href = '/register/success'
+    } catch (err: unknown) {
+      const apiErr = err as { detail?: string }
+      setError(apiErr.detail ?? 'Ошибка регистрации')
+      setLoading(false)
+    }
+  }
 
   return (
     <main className="auth-page">
@@ -51,23 +96,8 @@ export default function Register() {
         </div>
           <form
             className="login-form register-form"
-            key={step}
             autoComplete="off"
-            onSubmit={(event) => {
-              event.preventDefault()
-              if (step === 1 && email.trim() && password.trim()) {
-                setEmail('')
-                setPassword('')
-                setShowConfirm(false)
-                setShowPassword(false)
-                setStep(2)
-                return
-              }
-              if (step === 2) {
-                setRoleOpen(false)
-                window.location.href = '/register/success'
-              }
-            }}
+            onSubmit={handleSubmit}
           >
             {step === 1 ? (
               <>
@@ -279,19 +309,37 @@ export default function Register() {
             <>
               <label className="login-field">
                 <div className="login-input">
-                  <input type="text" name="lastName" placeholder="Фамилия" />
+                  <input
+                    type="text"
+                    name="lastName"
+                    placeholder="Фамилия"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
                   <span className="login-label">Фамилия</span>
                 </div>
               </label>
               <label className="login-field">
                 <div className="login-input">
-                  <input type="text" name="firstName" placeholder="Имя" />
+                  <input
+                    type="text"
+                    name="firstName"
+                    placeholder="Имя"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
                   <span className="login-label">Имя</span>
                 </div>
               </label>
               <label className="login-field">
                 <div className="login-input">
-                  <input type="text" name="middleName" placeholder="Отчество" />
+                  <input
+                    type="text"
+                    name="middleName"
+                    placeholder="Отчество"
+                    value={middleName}
+                    onChange={(e) => setMiddleName(e.target.value)}
+                  />
                   <span className="login-label">Отчество</span>
                 </div>
               </label>
@@ -387,10 +435,62 @@ export default function Register() {
                   )}
                 </div>
               </label>
+              {isSpecialist && (
+                <label className="login-field">
+                  <div className="register-select" aria-expanded={levelOpen} ref={levelRef}>
+                    <button
+                      className={`register-select-trigger${level ? ' has-value' : ''}`}
+                      type="button"
+                      onClick={() => setLevelOpen((v) => !v)}
+                      aria-expanded={levelOpen}
+                    >
+                      <span className="register-select-text">
+                        {level ? level.charAt(0).toUpperCase() + level.slice(1) : 'Выберите уровень'}
+                      </span>
+                      <span className="register-select-icon" aria-hidden="true">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M7 10L12 15L17 10" stroke="#0B1215" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </span>
+                    </button>
+                    {levelOpen && (
+                      <div className="register-select-menu">
+                        {['junior', 'middle', 'senior'].map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            className="register-select-item"
+                            onPointerDown={(event) => {
+                              event.preventDefault()
+                              event.stopPropagation()
+                              setLevel(item)
+                              setLevelOpen(false)
+                            }}
+                          >
+                            <span className="register-select-label">{item.charAt(0).toUpperCase() + item.slice(1)}</span>
+                            <span className={`register-select-check${level === item ? ' is-visible' : ''}`} aria-hidden="true">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <mask id={`mask_level_${item}`} style={{ maskType: 'luminance' }} maskUnits="userSpaceOnUse" x="1" y="1" width="22" height="22">
+                                  <path d="M12 22C13.3135 22.0016 14.6143 21.7437 15.8278 21.2411C17.0412 20.7384 18.1434 20.0009 19.071 19.071C20.0009 18.1434 20.7384 17.0412 21.2411 15.8278C21.7437 14.6143 22.0016 13.3135 22 12C22.0016 10.6866 21.7437 9.38572 21.2411 8.17225C20.7384 6.95878 20.0009 5.85659 19.071 4.92901C18.1434 3.99909 17.0412 3.26162 15.8278 2.75897C14.6143 2.25631 13.3135 1.99839 12 2.00001C10.6866 1.99839 9.38572 2.25631 8.17225 2.75897C6.95878 3.26162 5.85659 3.99909 4.92901 4.92901C3.99909 5.85659 3.26162 6.95878 2.75897 8.17225C2.25631 9.38572 1.99839 10.6866 2.00001 12C1.99839 13.3135 2.25631 14.6143 2.75897 15.8278C3.26162 17.0412 3.99909 18.1434 4.92901 19.071C5.85659 20.0009 6.95878 20.7384 8.17225 21.2411C9.38572 21.7437 10.6866 22.0016 12 22Z" fill="white" stroke="white" strokeWidth="2" strokeLinejoin="round" />
+                                  <path d="M8 12L11 15L17 9" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </mask>
+                                <g mask={`url(#mask_level_${item})`}>
+                                  <path d="M0 0H24V24H0V0Z" fill="#5260FF" />
+                                </g>
+                              </svg>
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </label>
+              )}
             </>
           )}
-            <button className="login-submit" type="submit">
-              Зарегистрироваться
+            {error && <p className="login-error" style={{ color: '#e53935', fontSize: '14px', margin: '0 0 8px' }}>{error}</p>}
+            <button className="login-submit" type="submit" disabled={loading}>
+              {loading ? 'Подождите...' : 'Зарегистрироваться'}
             </button>
             <div className="register-footer register-footer--inline">
               <span>Я согласен с условиями</span>
@@ -400,14 +500,12 @@ export default function Register() {
             </div>
           </form>
         </section>
-      {step !== 3 && (
-        <div className="login-footer">
-          <span>Уже зарегистрированы?</span>
-          <a href="/login" className="login-register">
-            Вход в систему
-          </a>
-        </div>
-      )}
+      <div className="login-footer">
+        <span>Уже зарегистрированы?</span>
+        <a href="/" className="login-register">
+          Вход в систему
+        </a>
+      </div>
     </main>
   )
 }

@@ -1,3 +1,4 @@
+import { useAuth } from './shared/auth/useAuth'
 import Login from './pages/auth/Login.tsx'
 import Register from './pages/auth/Register.tsx'
 import EmailVerification from './pages/auth/success/EmailVerification.tsx'
@@ -20,8 +21,41 @@ import CustomerNewProject from './pages/dashboard/CustomerNewProject.tsx'
 import ValidatorQueue from './pages/dashboard/ValidatorQueue.tsx'
 import ValidatorProfile from './pages/dashboard/ValidatorProfile.tsx'
 
+const PUBLIC_PATHS = ['/', '/register', '/register/success', '/forgot', '/forgot/reset', '/loading']
+
+function getDashboardPath(role: string): string {
+  switch (role) {
+    case 'specialist':
+      return '/dashboard/specialist'
+    case 'customer':
+      return '/dashboard/customer'
+    case 'validator':
+      return '/dashboard/validator'
+    default:
+      return '/'
+  }
+}
+
 function App() {
+  const { user, isLoading } = useAuth()
   const path = window.location.pathname.toLowerCase()
+
+  if (isLoading) {
+    return <Loading />
+  }
+
+  const isPublic = PUBLIC_PATHS.includes(path)
+
+  if (!user && !isPublic) {
+    window.location.href = '/'
+    return <Loading />
+  }
+
+  if (user && path === '/') {
+    window.location.href = getDashboardPath(user.role)
+    return <Loading />
+  }
+
   if (path === '/register') {
     return <Register />
   }

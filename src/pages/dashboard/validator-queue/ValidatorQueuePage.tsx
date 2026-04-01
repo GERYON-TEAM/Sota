@@ -15,7 +15,8 @@ import { useValidatorQueueQuery } from './hooks/useValidatorQueueQuery'
 import { useQueueSelection } from './hooks/useQueueSelection'
 import { useQueuePagination } from './hooks/useQueuePagination'
 import useOutsideClose from './hooks/useOutsideClose'
-import { CHECKLIST_CRITERIA, PRIORITY_CLASS_BY_LABEL, QUEUE_ITEMS } from './types/validator-queue.types'
+import { CHECKLIST_CRITERIA, PRIORITY_CLASS_BY_LABEL } from './types/validator-queue.types'
+import { useValidatorQueueData } from './hooks/useValidatorQueueData'
 
 export default function ValidatorQueuePage() {
   const { bellOpen, setBellOpen } = useDashboardDropdowns()
@@ -30,7 +31,8 @@ export default function ValidatorQueuePage() {
 
   const queueControlsRef = useRef<HTMLDivElement | null>(null)
 
-  const { query, setQuery, sort, setSort, resetFilters, filteredSortedItems } = useValidatorQueueQuery(QUEUE_ITEMS)
+  const { data: queueItems } = useValidatorQueueData()
+  const { query, setQuery, sort, setSort, resetFilters, filteredSortedItems } = useValidatorQueueQuery(queueItems)
   const { page, pagesCount, next, prev, pagedItems } = useQueuePagination(filteredSortedItems, 10)
   const { selectedId, selectedItem, select } = useQueueSelection(filteredSortedItems)
 
@@ -72,7 +74,7 @@ export default function ValidatorQueuePage() {
           <section className="validator-queue-grid">
             <article className="validator-queue-column">
               <QueueToolbar
-                queueCount={QUEUE_ITEMS.length}
+                queueCount={queueItems.length}
                 searchValue={query}
                 queueSort={sort}
                 queueMenuOpen={queueMenuOpen}

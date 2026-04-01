@@ -1,10 +1,14 @@
 import { useState } from 'react'
+import { requestPasswordReset } from '../../../shared/api/authApi'
 import Logo from '../../../shared/ui/logo/Logo'
 import AuthShape from '../../../shared/ui/auth-shape/AuthShape'
 import '../login.css'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
 
   return (
@@ -17,14 +21,23 @@ export default function ForgotPassword() {
       <section className="login-card">
         <div className="login-header">
           <h1>Восстановление пароля</h1>
-          <p>Укажите почту, привязанную к аккаунту</p>
+          <p>{sent ? 'Проверьте почту для восстановления' : 'Укажите почту, привязанную к аккаунту'}</p>
         </div>
         <form
           className="login-form"
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault()
-            if (isEmailValid) {
-              window.location.href = '/register/success'
+            if (!isEmailValid) return
+            setLoading(true)
+            setError('')
+            try {
+              await requestPasswordReset({ email: email.trim() })
+              setSent(true)
+            } catch (err: unknown) {
+              const apiErr = err as { detail?: string }
+              setError(apiErr.detail ?? 'Ошибка')
+            } finally {
+              setLoading(false)
             }
           }}
         >
@@ -81,9 +94,10 @@ export default function ForgotPassword() {
               </div>
             </div>
           </label>
-          {isEmailValid && (
-            <button className="login-submit" type="submit">
-              Отправить ссылку
+          {error && <p style={{ color: '#e53935', fontSize: '14px', margin: '0 0 8px' }}>{error}</p>}
+          {isEmailValid && !sent && (
+            <button className="login-submit" type="submit" disabled={loading}>
+              {loading ? 'Подождите...' : 'Отправить ссылку'}
             </button>
           )}
         </form>

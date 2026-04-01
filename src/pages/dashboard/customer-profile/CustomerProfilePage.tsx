@@ -28,32 +28,9 @@ export default function CustomerProfilePage() {
       ),
     [tabs]
   )
-  const {
-    profileDirty,
-    setProfileDirty,
-    firstName,
-    setFirstName,
-    lastName,
-    setLastName,
-    middleName,
-    setMiddleName,
-    avatarUrl,
-    setAvatarUrl,
-    aboutExperience,
-    aboutBio,
-    setAboutBio,
-    aboutStack,
-    aboutStackItems,
-    contactPhone,
-    setContactPhone,
-    contactEmail,
-    setContactEmail,
-    contactTelegram,
-    setContactTelegram,
-    contactGithub,
-  } = useProfileDraft()
+  const draft = useProfileDraft()
 
-  const { handleAvatarChange } = useAvatarUpload({ setAvatarUrl, setProfileDirty })
+  const { handleAvatarChange } = useAvatarUpload({ setAvatarUrl: draft.setAvatarUrl, setProfileDirty: draft.setProfileDirty })
 
   return (
     <div className="dashboard dashboard--customer">
@@ -75,55 +52,55 @@ export default function CustomerProfilePage() {
 
               <ProfilePanel
                 activeTab={activeTab}
-                avatarUrl={avatarUrl}
+                avatarUrl={draft.avatarUrl}
                 onAvatarChange={handleAvatarChange}
                 onRemoveAvatar={() => {
-                  setAvatarUrl(null)
-                  setProfileDirty(true)
+                  draft.setAvatarUrl(null)
+                  draft.setProfileDirty(true)
                 }}
-                profileDirty={profileDirty}
-                onSaveProfile={() => setProfileDirty(false)}
-                firstName={firstName}
-                lastName={lastName}
-                middleName={middleName}
+                profileDirty={draft.profileDirty}
+                onSaveProfile={() => draft.saveProfile()}
+                firstName={draft.firstName}
+                lastName={draft.lastName}
+                middleName={draft.middleName}
                 onFirstNameChange={(value) => {
-                  setFirstName(value)
-                  setProfileDirty(true)
+                  draft.setFirstName(value)
+                  draft.setProfileDirty(true)
                 }}
                 onLastNameChange={(value) => {
-                  setLastName(value)
-                  setProfileDirty(true)
+                  draft.setLastName(value)
+                  draft.setProfileDirty(true)
                 }}
                 onMiddleNameChange={(value) => {
-                  setMiddleName(value)
-                  setProfileDirty(true)
+                  draft.setMiddleName(value)
+                  draft.setProfileDirty(true)
                 }}
-                aboutExperience={aboutExperience}
-                aboutBio={aboutBio}
-                aboutStack={aboutStack}
-                aboutStackItems={aboutStackItems}
+                aboutExperience={draft.aboutExperience}
+                aboutBio={draft.aboutBio}
+                aboutStack={draft.aboutStack}
+                aboutStackItems={draft.aboutStackItems}
                 onExperienceChange={() => {}}
                 onBioChange={(value) => {
-                  setAboutBio(value)
-                  setProfileDirty(true)
+                  draft.setAboutBio(value)
+                  draft.setProfileDirty(true)
                 }}
                 onStackChange={() => {}}
                 onAddStack={() => {}}
-                contactPhone={contactPhone}
-                contactEmail={contactEmail}
-                contactTelegram={contactTelegram}
-                contactGithub={contactGithub}
+                contactPhone={draft.contactPhone}
+                contactEmail={draft.contactEmail}
+                contactTelegram={draft.contactTelegram}
+                contactGithub={draft.contactGithub}
                 onContactPhoneChange={(value) => {
-                  setContactPhone(value)
-                  setProfileDirty(true)
+                  draft.setContactPhone(value)
+                  draft.setProfileDirty(true)
                 }}
                 onContactEmailChange={(value) => {
-                  setContactEmail(value)
-                  setProfileDirty(true)
+                  draft.setContactEmail(value)
+                  draft.setProfileDirty(true)
                 }}
                 onContactTelegramChange={(value) => {
-                  setContactTelegram(value)
-                  setProfileDirty(true)
+                  draft.setContactTelegram(value)
+                  draft.setProfileDirty(true)
                 }}
                 onContactGithubChange={() => {}}
                 aboutLabel="О заказчике"

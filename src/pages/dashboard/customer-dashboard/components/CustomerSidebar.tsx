@@ -1,4 +1,7 @@
+import { useAuth } from '../../../../shared/auth/useAuth'
+
 export default function CustomerSidebar() {
+  const { logout } = useAuth()
   const path = window.location.pathname.toLowerCase()
   const isCustomPath = path.startsWith('/dashboard/custom')
   const dashboardBasePath = isCustomPath ? '/dashboard/custom' : '/dashboard/customer'
@@ -105,7 +108,7 @@ export default function CustomerSidebar() {
         </a>
       </nav>
 
-      <button className="dash-item logout" type="button">
+      <button className="dash-item logout" type="button" onClick={() => logout()}>
         <span className="dash-icon">
           <svg
             width="24"

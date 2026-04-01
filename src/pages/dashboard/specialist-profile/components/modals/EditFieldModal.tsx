@@ -8,6 +8,8 @@ type EditFieldModalProps = {
   onChangeConfirm: (value: string) => void
   onClose: () => void
   onSave: () => void
+  error?: string
+  saving?: boolean
 }
 
 export default function EditFieldModal({
@@ -20,6 +22,8 @@ export default function EditFieldModal({
   onChangeConfirm,
   onClose,
   onSave,
+  error,
+  saving,
 }: EditFieldModalProps) {
   if (!isOpen) return null
 
@@ -71,12 +75,14 @@ export default function EditFieldModal({
           </label>
         </div>
 
+        {error && <p style={{ color: '#e53935', fontSize: '14px', margin: '0 16px 8px' }}>{error}</p>}
+
         <div className="profile-modal__actions">
           <button className="profile-modal__btn profile-modal__btn--muted" type="button" onClick={onClose}>
             Отмена
           </button>
-          <button className="profile-modal__btn profile-modal__btn--primary" type="button" onClick={onSave}>
-            Сохранить
+          <button className="profile-modal__btn profile-modal__btn--primary" type="button" onClick={onSave} disabled={saving}>
+            {saving ? 'Сохранение...' : 'Сохранить'}
           </button>
         </div>
       </div>

@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import './styles/index.css'
 import CustomerSidebar from './components/CustomerSidebar'
 import CustomerHeaderBar from './components/CustomerHeaderBar'
 import CustomerStatsSection from './components/CustomerStatsSection'
 import CustomerActiveProjectsSection from './components/CustomerActiveProjectsSection'
 import { useDashboardDropdowns } from '../specialist-dashboard/hooks/useDashboardDropdowns'
-import type { ActiveProject } from './types/dashboard.types'
+import { useCustomerDashboardData } from './hooks/useCustomerDashboardData'
 
 const DASHBOARD_PUBLISH_NOTICE_STORAGE_KEY = 'sota:customer-dashboard:publish-notice:v1'
 
@@ -18,92 +18,7 @@ type DashboardPublishNotice = {
 export default function CustomerDashboardPage() {
   const hasNotifications = true
   const [publishNotice, setPublishNotice] = useState<DashboardPublishNotice | null>(null)
-
-  const projects = useMemo<ActiveProject[]>(
-    () => [
-      {
-        role: 'В процессе',
-        title: 'Разработка программы',
-        taskName: 'Название задачи',
-        taskDesc: 'Краткое описание задачи, может занимать пару строк в блоке.',
-        taskDate: '25.02.2026',
-        progress: 90,
-        leadName: 'Нестеров Ярослав',
-        leadRole: 'Tech Lead',
-      },
-      {
-        role: 'Опубликовано',
-        title: 'Платежный сервис',
-        taskName: 'Интеграция провайдера',
-        taskDesc: 'Подключить новый платежный шлюз и подготовить документацию.',
-        taskDate: '12.03.2026',
-        progress: 65,
-        leadName: 'Иван Петров',
-        leadRole: 'Tech Lead',
-      },
-      {
-        role: 'Завершено',
-        title: 'Маркетплейс',
-        taskName: 'Оптимизация БД',
-        taskDesc: 'Ускорить выборки и переработать индексацию.',
-        taskDate: '05.03.2026',
-        progress: 40,
-        leadName: 'Анна Миронова',
-        leadRole: 'Tech Lead',
-      },
-      {
-        role: 'Черновик',
-        title: 'CRM система',
-        taskName: 'Рефакторинг API',
-        taskDesc: 'Убрать дублирование и привести к единому формату ответов.',
-        taskDate: '18.03.2026',
-        progress: 75,
-        leadName: 'Сергей Иванов',
-        leadRole: 'Tech Lead',
-      },
-      {
-        role: 'В процессе',
-        title: 'HR платформа',
-        taskName: 'Интеграция резюме',
-        taskDesc: 'Добавить импорт резюме и автоматическое распределение кандидатов.',
-        taskDate: '02.04.2026',
-        progress: 55,
-        leadName: 'Мария Орлова',
-        leadRole: 'Tech Lead',
-      },
-      {
-        role: 'Опубликовано',
-        title: 'Логистика',
-        taskName: 'Маршрутизация',
-        taskDesc: 'Настроить распределение заказов и контроль SLA.',
-        taskDate: '10.04.2026',
-        progress: 30,
-        leadName: 'Олег Смирнов',
-        leadRole: 'Tech Lead',
-      },
-      {
-        role: 'Завершено',
-        title: 'Складской учет',
-        taskName: 'Отчеты',
-        taskDesc: 'Сформировать отчеты по остаткам и оборачиваемости.',
-        taskDate: '28.03.2026',
-        progress: 100,
-        leadName: 'Екатерина Громова',
-        leadRole: 'Tech Lead',
-      },
-      {
-        role: 'Черновик',
-        title: 'Обучающая платформа',
-        taskName: 'Курс API',
-        taskDesc: 'Подготовить материалы и структуру курса.',
-        taskDate: '15.04.2026',
-        progress: 10,
-        leadName: 'Дмитрий Беляев',
-        leadRole: 'Tech Lead',
-      },
-    ],
-    [],
-  )
+  const { projects, loading, error } = useCustomerDashboardData()
 
   const { bellOpen, setBellOpen } = useDashboardDropdowns()
 
@@ -166,8 +81,13 @@ export default function CustomerDashboardPage() {
         <div className="dashboard-surface">
           <CustomerStatsSection />
 
-          <CustomerActiveProjectsSection projects={projects} />
-
+          {loading ? (
+            <p style={{ textAlign: 'center', padding: '40px 0' }}>Загрузка...</p>
+          ) : error ? (
+            <p style={{ textAlign: 'center', padding: '40px 0', color: '#e53935' }}>{error}</p>
+          ) : (
+            <CustomerActiveProjectsSection projects={projects} />
+          )}
         </div>
       </main>
     </div>

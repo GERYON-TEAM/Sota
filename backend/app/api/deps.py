@@ -11,6 +11,7 @@ from app.core.exceptions import AuthenticationError
 from app.services.auth_service import AuthService
 from app.services.specialist_service import SpecialistService
 from app.services.project_service import ProjectService
+from app.services.validator_service import ValidatorService
 
 oauth2_scheme = HTTPBearer()
 oauth2_scheme_optional = HTTPBearer(auto_error=False)
@@ -80,3 +81,7 @@ async def get_specialist_service(db: AsyncSession = Depends(get_db)) -> Speciali
 
 async def get_project_service(db: AsyncSession = Depends(get_db)) -> ProjectService:
     return ProjectService(db)
+
+
+async def get_validator_service(db: AsyncSession = Depends(get_db)) -> ValidatorService:
+    return ValidatorService(db)

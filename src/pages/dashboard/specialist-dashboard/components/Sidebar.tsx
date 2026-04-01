@@ -1,4 +1,7 @@
+import { useAuth } from '../../../../shared/auth/useAuth'
+
 export default function Sidebar() {
+  const { logout } = useAuth()
   const path = window.location.pathname.toLowerCase()
   const isDashboard = path === '/dashboard/specialist'
   const isPortfolio = path === '/dashboard/specialist/portfolio'
@@ -134,7 +137,7 @@ export default function Sidebar() {
         </a>
       </nav>
 
-      <button className="dash-item logout" type="button">
+      <button className="dash-item logout" type="button" onClick={() => logout()}>
         <span className="dash-icon">
           <svg
             width="24"

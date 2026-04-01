@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useAuth } from '../../../shared/auth/useAuth'
 import CustomerHeaderBar from '../customer-dashboard/components/CustomerHeaderBar'
 import '../customer-dashboard/styles/index.css'
 import '../specialist-dashboard/styles/index.css'
@@ -14,6 +15,7 @@ import EditFieldModal from '../specialist-profile/components/modals/EditFieldMod
 import ConfirmModal from '../specialist-profile/components/modals/ConfirmModal'
 
 function ValidatorSidebar() {
+  const { logout } = useAuth()
   const path = window.location.pathname.toLowerCase()
   const isQueue = path === '/queue/validator' || path === '/dashboard/validator'
   const isProfile = path === '/queue/validator/profile' || path === '/dashboard/validator/profile'
@@ -95,7 +97,7 @@ function ValidatorSidebar() {
         </a>
       </nav>
 
-      <button className="dash-item logout" type="button">
+      <button className="dash-item logout" type="button" onClick={() => logout()}>
         <span className="dash-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path

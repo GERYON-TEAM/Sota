@@ -10,6 +10,7 @@ import ProfileTabs from './components/ProfileTabs'
 import ProfilePanel from './components/ProfilePanel'
 import EditFieldModal from './components/modals/EditFieldModal'
 import ConfirmModal from './components/modals/ConfirmModal'
+import { changePassword } from '../../../shared/api/authApi'
 
 export default function ProfilePage() {
   const [bellOpen, setBellOpen] = useState(false)
@@ -19,38 +20,50 @@ export default function ProfilePage() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordSaving, setPasswordSaving] = useState(false)
 
   const { tabs, activeTab, setActiveTab } = useProfileTabs()
-  const {
-    profileDirty,
-    setProfileDirty,
-    firstName,
-    setFirstName,
-    lastName,
-    setLastName,
-    middleName,
-    setMiddleName,
-    avatarUrl,
-    setAvatarUrl,
-    aboutExperience,
-    setAboutExperience,
-    aboutBio,
-    setAboutBio,
-    aboutStack,
-    setAboutStack,
-    aboutStackItems,
-    addStackItems,
-    contactPhone,
-    setContactPhone,
-    contactEmail,
-    setContactEmail,
-    contactTelegram,
-    setContactTelegram,
-    contactGithub,
-    setContactGithub,
-  } = useProfileDraft()
+  const draft = useProfileDraft()
+  const { handleAvatarChange } = useAvatarUpload({ setAvatarUrl: draft.setAvatarUrl, setProfileDirty: draft.setProfileDirty })
 
-  const { handleAvatarChange } = useAvatarUpload({ setAvatarUrl, setProfileDirty })
+  const handleSavePassword = async () => {
+    setPasswordError('')
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Пароли не совпадают')
+      return
+    }
+    if (newPassword.length < 8) {
+      setPasswordError('Минимум 8 символов')
+      return
+    }
+    setPasswordSaving(true)
+    try {
+      await changePassword({ old_password: currentPassword, new_password: newPassword })
+      setPasswordModalOpen(false)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+    } catch (err: unknown) {
+      const apiErr = err as { detail?: string }
+      setPasswordError(apiErr.detail ?? 'Ошибка смены пароля')
+    } finally {
+      setPasswordSaving(false)
+    }
+  }
+
+  if (draft.loading) {
+    return (
+      <div className="dashboard">
+        <Sidebar />
+        <main className="dashboard-content">
+          <div className="dashboard-surface" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+            <p>Загрузка...</p>
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className="dashboard">
@@ -72,75 +85,75 @@ export default function ProfilePage() {
 
               <ProfilePanel
                 activeTab={activeTab}
-                avatarUrl={avatarUrl}
+                avatarUrl={draft.avatarUrl}
                 onAvatarChange={handleAvatarChange}
                 onRemoveAvatar={() => {
-                  setAvatarUrl(null)
-                  setProfileDirty(true)
+                  draft.setAvatarUrl(null)
+                  draft.setProfileDirty(true)
                 }}
-                profileDirty={profileDirty}
-                onSaveProfile={() => setProfileDirty(false)}
-                firstName={firstName}
-                lastName={lastName}
-                middleName={middleName}
+                profileDirty={draft.profileDirty}
+                onSaveProfile={() => draft.saveProfile()}
+                firstName={draft.firstName}
+                lastName={draft.lastName}
+                middleName={draft.middleName}
                 onFirstNameChange={(value) => {
-                  setFirstName(value)
-                  setProfileDirty(true)
+                  draft.setFirstName(value)
+                  draft.setProfileDirty(true)
                 }}
                 onLastNameChange={(value) => {
-                  setLastName(value)
-                  setProfileDirty(true)
+                  draft.setLastName(value)
+                  draft.setProfileDirty(true)
                 }}
                 onMiddleNameChange={(value) => {
-                  setMiddleName(value)
-                  setProfileDirty(true)
+                  draft.setMiddleName(value)
+                  draft.setProfileDirty(true)
                 }}
                 twoFactorEnabled={twoFactorEnabled}
                 onToggleTwoFactor={() => setTwoFactorEnabled((prev) => !prev)}
                 onOpenPasswordModal={() => setPasswordModalOpen(true)}
                 onOpenDeleteModal={() => setDeleteModalOpen(true)}
-                aboutExperience={aboutExperience}
-                aboutBio={aboutBio}
-                aboutStack={aboutStack}
-                aboutStackItems={aboutStackItems}
+                aboutExperience={draft.aboutExperience}
+                aboutBio={draft.aboutBio}
+                aboutStack={draft.aboutStack}
+                aboutStackItems={draft.aboutStackItems}
                 onExperienceChange={(value) => {
-                  setAboutExperience(value)
-                  setProfileDirty(true)
+                  draft.setAboutExperience(value)
+                  draft.setProfileDirty(true)
                 }}
                 onBioChange={(value) => {
-                  setAboutBio(value)
-                  setProfileDirty(true)
+                  draft.setAboutBio(value)
+                  draft.setProfileDirty(true)
                 }}
                 onStackChange={(value) => {
-                  setAboutStack(value)
-                  setProfileDirty(true)
+                  draft.setAboutStack(value)
+                  draft.setProfileDirty(true)
                 }}
                 onAddStack={() => {
-                  const value = aboutStack.trim()
+                  const value = draft.aboutStack.trim()
                   if (!value) return
-                  addStackItems(value)
-                  setAboutStack('')
-                  setProfileDirty(true)
+                  draft.addStackItems(value)
+                  draft.setAboutStack('')
+                  draft.setProfileDirty(true)
                 }}
-                contactPhone={contactPhone}
-                contactEmail={contactEmail}
-                contactTelegram={contactTelegram}
-                contactGithub={contactGithub}
+                contactPhone={draft.contactPhone}
+                contactEmail={draft.contactEmail}
+                contactTelegram={draft.contactTelegram}
+                contactGithub={draft.contactGithub}
                 onContactPhoneChange={(value) => {
-                  setContactPhone(value)
-                  setProfileDirty(true)
+                  draft.setContactPhone(value)
+                  draft.setProfileDirty(true)
                 }}
                 onContactEmailChange={(value) => {
-                  setContactEmail(value)
-                  setProfileDirty(true)
+                  draft.setContactEmail(value)
+                  draft.setProfileDirty(true)
                 }}
                 onContactTelegramChange={(value) => {
-                  setContactTelegram(value)
-                  setProfileDirty(true)
+                  draft.setContactTelegram(value)
+                  draft.setProfileDirty(true)
                 }}
                 onContactGithubChange={(value) => {
-                  setContactGithub(value)
-                  setProfileDirty(true)
+                  draft.setContactGithub(value)
+                  draft.setProfileDirty(true)
                 }}
               />
             </div>
@@ -156,13 +169,13 @@ export default function ProfilePage() {
         onChangeCurrent={setCurrentPassword}
         onChangeNew={setNewPassword}
         onChangeConfirm={setConfirmPassword}
-        onClose={() => setPasswordModalOpen(false)}
-        onSave={() => {
+        onClose={() => {
           setPasswordModalOpen(false)
-          setCurrentPassword('')
-          setNewPassword('')
-          setConfirmPassword('')
+          setPasswordError('')
         }}
+        onSave={handleSavePassword}
+        error={passwordError}
+        saving={passwordSaving}
       />
 
       <ConfirmModal

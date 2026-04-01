@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { changePassword } from '../../../shared/api/authApi'
 import Logo from '../../../shared/ui/logo/Logo'
 import AuthShape from '../../../shared/ui/auth-shape/AuthShape'
 import EyeIcon from '../../../shared/ui/eye-icon/EyeIcon'
@@ -8,6 +9,14 @@ import '../register.css'
 export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+
+  const params = new URLSearchParams(window.location.search)
+  const resetToken = params.get('token') ?? ''
 
   return (
     <main className="auth-page">
@@ -21,11 +30,25 @@ export default function ResetPassword() {
           <h1>Восстановление пароля</h1>
           <p>Придумайте новый пароль.</p>
         </div>
-        <form className="login-form" onSubmit={(event) => event.preventDefault()}>
+        <form className="login-form" onSubmit={async (event) => {
+          event.preventDefault()
+          if (!password || password !== confirmPassword) return
+          setLoading(true)
+          setError('')
+          try {
+            await changePassword({ new_password: password, reset_token: resetToken || undefined })
+            setSuccess(true)
+          } catch (err: unknown) {
+            const apiErr = err as { detail?: string }
+            setError(apiErr.detail ?? 'Ошибка')
+          } finally {
+            setLoading(false)
+          }
+        }}>
           <label className="login-field login-field--password">
             <div className="register-input-row">
               <div className="login-input">
-              <input type={showPassword ? 'text' : 'password'} name="password" placeholder="Пароль" />
+              <input type={showPassword ? 'text' : 'password'} name="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} />
               <span className="login-label">Пароль</span>
               <div className="login-icons">
                 <button
@@ -69,6 +92,8 @@ export default function ResetPassword() {
                 type={showConfirm ? 'text' : 'password'}
                 name="confirmPassword"
                 placeholder="Подтвердите пароль"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />
               <span className="login-label">Подтвердите пароль</span>
               <div className="login-icons">
@@ -83,9 +108,14 @@ export default function ResetPassword() {
               </div>
             </div>
           </label>
-          <button className="login-submit" type="submit">
-            Сохранить пароль
-          </button>
+          {error && <p style={{ color: '#e53935', fontSize: '14px', margin: '0 0 8px' }}>{error}</p>}
+          {success ? (
+            <a href="/" className="login-submit" style={{ textAlign: 'center', textDecoration: 'none', display: 'block' }}>Войти</a>
+          ) : (
+            <button className="login-submit" type="submit" disabled={loading}>
+              {loading ? 'Подождите...' : 'Сохранить пароль'}
+            </button>
+          )}
         </form>
       </section>
     </main>
