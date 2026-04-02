@@ -48,14 +48,6 @@ export function useNewProjectForm() {
   const [projectStart, setProjectStart] = useState('')
   const [projectEnd, setProjectEnd] = useState('')
 
-  const [planningModelOpen, setPlanningModelOpen] = useState(false)
-  const [planningModelValue, setPlanningModelValue] = useState('Agile (Scrum)')
-  const [planningStackOpen, setPlanningStackOpen] = useState(false)
-  const [planningStackValue, setPlanningStackValue] = useState('React + TypeScript + Node.js')
-  const [planningComplexityOpen, setPlanningComplexityOpen] = useState(false)
-  const [planningComplexityValue, setPlanningComplexityValue] = useState('Средняя')
-  const [planningPreviewVisible, setPlanningPreviewVisible] = useState(false)
-
   const [validationAgreement, setValidationAgreement] = useState(false)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('transfer')
   const [paymentCardNumber, setPaymentCardNumber] = useState('')
@@ -85,7 +77,7 @@ export function useNewProjectForm() {
         key: 'team',
         label: 'Генерация плана',
         title: 'Генерация плана',
-        description: 'Это опциональный этап, вы можете его пропустить',
+        description: 'Формируем план проекта на основе указанных вами данных',
       },
       {
         key: 'review',
@@ -147,18 +139,6 @@ export function useNewProjectForm() {
     [],
   )
 
-  const planningModels = useMemo(
-    () => ['Agile (Scrum)', 'Kanban', 'Waterfall', 'Гибридная модель'],
-    [],
-  )
-
-  const planningStacks = useMemo(
-    () => ['React + TypeScript + Node.js', 'Vue + TypeScript + NestJS', 'Python + Django + React', 'Flutter + Firebase'],
-    [],
-  )
-
-  const planningComplexities = useMemo(() => ['Низкая', 'Средняя', 'Высокая'], [])
-
   const values = useMemo<NewProjectFormValues>(
     () => ({
       projectTypeValue,
@@ -176,10 +156,6 @@ export function useNewProjectForm() {
       budgetValue,
       projectStart,
       projectEnd,
-      planningModelValue,
-      planningStackValue,
-      planningComplexityValue,
-      planningPreviewVisible,
       validationAgreement,
       selectedPaymentMethod,
       paymentCardNumber,
@@ -202,10 +178,6 @@ export function useNewProjectForm() {
       budgetValue,
       projectStart,
       projectEnd,
-      planningModelValue,
-      planningStackValue,
-      planningComplexityValue,
-      planningPreviewVisible,
       validationAgreement,
       selectedPaymentMethod,
       paymentCardNumber,
@@ -235,9 +207,6 @@ export function useNewProjectForm() {
     setProjectTypeOpen(false)
     setProjectSizeOpen(false)
     setPaymentTypeOpen(false)
-    setPlanningModelOpen(false)
-    setPlanningStackOpen(false)
-    setPlanningComplexityOpen(false)
   }
 
   const applyDraft = (draft: Partial<NewProjectDraft>) => {
@@ -262,10 +231,6 @@ export function useNewProjectForm() {
     if (typeof draft.budgetValue === 'string') setBudgetValue(draft.budgetValue)
     if (typeof draft.projectStart === 'string') setProjectStart(draft.projectStart)
     if (typeof draft.projectEnd === 'string') setProjectEnd(draft.projectEnd)
-    if (typeof draft.planningModelValue === 'string') setPlanningModelValue(draft.planningModelValue)
-    if (typeof draft.planningStackValue === 'string') setPlanningStackValue(draft.planningStackValue)
-    if (typeof draft.planningComplexityValue === 'string') setPlanningComplexityValue(draft.planningComplexityValue)
-    if (typeof draft.planningPreviewVisible === 'boolean') setPlanningPreviewVisible(draft.planningPreviewVisible)
     if (typeof draft.validationAgreement === 'boolean') setValidationAgreement(draft.validationAgreement)
     if (typeof draft.selectedPaymentMethod === 'string') setSelectedPaymentMethod(draft.selectedPaymentMethod)
     if (typeof draft.paymentCardNumber === 'string') setPaymentCardNumber(draft.paymentCardNumber)
@@ -296,9 +261,6 @@ export function useNewProjectForm() {
     projectFeatures,
     paymentTypes,
     projectBalances,
-    planningModels,
-    planningStacks,
-    planningComplexities,
     projectTypeOpen,
     setProjectTypeOpen,
     projectSizeOpen,
@@ -320,16 +282,6 @@ export function useNewProjectForm() {
     setBudgetValue,
     setProjectStart,
     setProjectEnd,
-    planningModelOpen,
-    setPlanningModelOpen,
-    setPlanningModelValue,
-    planningStackOpen,
-    setPlanningStackOpen,
-    setPlanningStackValue,
-    planningComplexityOpen,
-    setPlanningComplexityOpen,
-    setPlanningComplexityValue,
-    setPlanningPreviewVisible,
     setValidationAgreement,
     setSelectedPaymentMethod,
     setPaymentCardNumber,

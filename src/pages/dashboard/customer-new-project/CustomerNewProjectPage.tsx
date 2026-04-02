@@ -12,7 +12,6 @@ import BudgetStep from './components/sections/BudgetStep'
 import TeamStep from './components/sections/TeamStep'
 import ReviewStep from './components/sections/ReviewStep'
 import AttachmentsStep from './components/sections/AttachmentsStep'
-import DetailsStep from './components/sections/DetailsStep'
 import ConfirmLeaveModal from './components/modals/ConfirmLeaveModal'
 import TemplateModal from './components/modals/TemplateModal'
 import { useNewProjectForm } from './hooks/useNewProjectForm'
@@ -144,24 +143,8 @@ export default function CustomerNewProjectPage() {
     if (stepsState.step === 2) {
       return (
         <TeamStep
-          planningModelOpen={form.planningModelOpen}
-          planningModelValue={form.values.planningModelValue}
-          planningModels={form.planningModels}
-          planningStackOpen={form.planningStackOpen}
-          planningStackValue={form.values.planningStackValue}
-          planningStacks={form.planningStacks}
-          planningComplexityOpen={form.planningComplexityOpen}
-          planningComplexityValue={form.values.planningComplexityValue}
-          planningComplexities={form.planningComplexities}
-          planningPreviewVisible={form.values.planningPreviewVisible}
           onLoadingStateChange={setPlanningLoadingActive}
-          setPlanningModelOpen={form.setPlanningModelOpen}
-          setPlanningModelValue={form.setPlanningModelValue}
-          setPlanningStackOpen={form.setPlanningStackOpen}
-          setPlanningStackValue={form.setPlanningStackValue}
-          setPlanningComplexityOpen={form.setPlanningComplexityOpen}
-          setPlanningComplexityValue={form.setPlanningComplexityValue}
-          setPlanningPreviewVisible={form.setPlanningPreviewVisible}
+          onComplete={stepsState.next}
         />
       )
     }
@@ -198,7 +181,7 @@ export default function CustomerNewProjectPage() {
       )
     }
 
-    return <DetailsStep />
+    return null
   }
 
   return (
@@ -265,7 +248,6 @@ export default function CustomerNewProjectPage() {
                   canNext={stepsState.canNext}
                   validationAgreement={form.values.validationAgreement}
                   onSaveDraft={handleSaveDraft}
-                  onSkipPlanning={() => stepsState.next()}
                   onPublish={handlePublish}
                   onBack={() => stepsState.back()}
                   onNext={() => stepsState.next()}

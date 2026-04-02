@@ -4,7 +4,6 @@ type NewProjectFooterProps = {
   canNext: boolean
   validationAgreement: boolean
   onSaveDraft: () => void
-  onSkipPlanning: () => void
   onPublish: () => void
   onBack: () => void
   onNext: () => void
@@ -19,7 +18,6 @@ export default function NewProjectFooter({
   canNext,
   validationAgreement,
   onSaveDraft,
-  onSkipPlanning,
   onPublish,
   onBack,
   onNext,
@@ -77,12 +75,6 @@ export default function NewProjectFooter({
         </div>
       ) : (
         draftBlock
-      )}
-
-      {currentStep === 2 && (
-        <button className="customer-new-project-skip" type="button" onClick={onSkipPlanning}>
-          Пропустить этап
-        </button>
       )}
 
       {currentStep >= 4 && (

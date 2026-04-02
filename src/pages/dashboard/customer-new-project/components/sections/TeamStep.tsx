@@ -1,26 +1,11 @@
 import { useEffect, useState } from 'react'
-import Select from '../ui/Select'
 
 type TeamStepProps = {
-  planningModelOpen: boolean
-  planningModelValue: string
-  planningModels: string[]
-  planningStackOpen: boolean
-  planningStackValue: string
-  planningStacks: string[]
-  planningComplexityOpen: boolean
-  planningComplexityValue: string
-  planningComplexities: string[]
-  planningPreviewVisible: boolean
   onLoadingStateChange: (next: boolean) => void
-  setPlanningModelOpen: (next: boolean) => void
-  setPlanningModelValue: (value: string) => void
-  setPlanningStackOpen: (next: boolean) => void
-  setPlanningStackValue: (value: string) => void
-  setPlanningComplexityOpen: (next: boolean) => void
-  setPlanningComplexityValue: (value: string) => void
-  setPlanningPreviewVisible: (next: boolean | ((prev: boolean) => boolean)) => void
+  onComplete: () => void
 }
+
+const LOADING_DURATION_MS = 5000
 
 function PlanningLoadingLogo() {
   return (
@@ -75,184 +60,51 @@ function PlanningLoadingLogo() {
   )
 }
 
-export default function TeamStep(props: TeamStepProps) {
-  const {
-    planningModelOpen,
-    planningModelValue,
-    planningModels,
-    planningStackOpen,
-    planningStackValue,
-    planningStacks,
-    planningComplexityOpen,
-    planningComplexityValue,
-    planningComplexities,
-    planningPreviewVisible,
-    onLoadingStateChange,
-    setPlanningModelOpen,
-    setPlanningModelValue,
-    setPlanningStackOpen,
-    setPlanningStackValue,
-    setPlanningComplexityOpen,
-    setPlanningComplexityValue,
-    setPlanningPreviewVisible,
-  } = props
-
-  const [initialLoading, setInitialLoading] = useState(true)
-  const [initialLoadingProgress, setInitialLoadingProgress] = useState(0)
+export default function TeamStep({ onLoadingStateChange, onComplete }: TeamStepProps) {
   const [loadingProgress, setLoadingProgress] = useState(0)
 
   useEffect(() => {
+    onLoadingStateChange(true)
+
     const startedAt = Date.now()
     const intervalId = window.setInterval(() => {
       const elapsed = Date.now() - startedAt
-      const nextProgress = Math.min(100, Math.round((elapsed / 5000) * 100))
-      setInitialLoadingProgress(nextProgress)
+      const nextProgress = Math.min(100, Math.round((elapsed / LOADING_DURATION_MS) * 100))
+      setLoadingProgress(nextProgress)
     }, 50)
 
     const timeoutId = window.setTimeout(() => {
-      setInitialLoading(false)
-      setInitialLoadingProgress(100)
-    }, 5000)
+      setLoadingProgress(100)
+      onComplete()
+    }, LOADING_DURATION_MS)
 
     return () => {
       window.clearInterval(intervalId)
       window.clearTimeout(timeoutId)
+      onLoadingStateChange(false)
     }
-  }, [])
-
-  useEffect(() => {
-    onLoadingStateChange(initialLoading || planningPreviewVisible)
-  }, [initialLoading, onLoadingStateChange, planningPreviewVisible])
-
-  useEffect(() => {
-    return () => onLoadingStateChange(false)
-  }, [onLoadingStateChange])
-
-  useEffect(() => {
-    if (!planningPreviewVisible) {
-      setLoadingProgress(0)
-      return
-    }
-
-    const startedAt = Date.now()
-    const intervalId = window.setInterval(() => {
-      const elapsed = Date.now() - startedAt
-      const nextProgress = Math.min(100, Math.round((elapsed / 5000) * 100))
-      setLoadingProgress(nextProgress)
-    }, 50)
-
-    return () => window.clearInterval(intervalId)
-  }, [planningPreviewVisible])
-
-  if (initialLoading) {
-    return (
-      <section className="customer-new-project-plan customer-new-project-plan--intro-loading">
-        <div className="customer-new-project-plan__loading-head">
-          <strong>Генерация плана</strong>
-          <span>Строим планы и рассчитываем сроки...</span>
-        </div>
-
-        <div className="customer-new-project-plan__loading-center">
-          <div className="customer-new-project-plan__hero-loader" aria-hidden="true">
-            <PlanningLoadingLogo />
-          </div>
-
-          <div className="customer-new-project-plan__progress customer-new-project-plan__progress--intro">
-            {initialLoadingProgress}%
-          </div>
-
-          <p className="customer-new-project-plan__note">
-            Генерация может занимать некоторое время
-          </p>
-        </div>
-      </section>
-    )
-  }
+  }, [onComplete, onLoadingStateChange])
 
   return (
-    <div className="customer-new-project-form">
-      <Select
-        label="Модель управления"
-        value={planningModelValue}
-        options={planningModels}
-        open={planningModelOpen}
-        onToggle={() => {
-          setPlanningModelOpen(!planningModelOpen)
-          setPlanningStackOpen(false)
-          setPlanningComplexityOpen(false)
-        }}
-        onSelect={(value) => {
-          setPlanningModelValue(value)
-          setPlanningModelOpen(false)
-        }}
-      />
-
-      <Select
-        label="Требуемый стек технологий"
-        value={planningStackValue}
-        options={planningStacks}
-        open={planningStackOpen}
-        onToggle={() => {
-          setPlanningStackOpen(!planningStackOpen)
-          setPlanningModelOpen(false)
-          setPlanningComplexityOpen(false)
-        }}
-        onSelect={(value) => {
-          setPlanningStackValue(value)
-          setPlanningStackOpen(false)
-        }}
-      />
-
-      <Select
-        label="Сложность проекта"
-        value={planningComplexityValue}
-        options={planningComplexities}
-        open={planningComplexityOpen}
-        onToggle={() => {
-          setPlanningComplexityOpen(!planningComplexityOpen)
-          setPlanningModelOpen(false)
-          setPlanningStackOpen(false)
-        }}
-        onSelect={(value) => {
-          setPlanningComplexityValue(value)
-          setPlanningComplexityOpen(false)
-        }}
-      />
-
-      <div className="customer-new-project-planning__actions">
-        <button className="customer-new-project-planning__show-btn" type="button" onClick={() => setPlanningPreviewVisible((prev) => !prev)}>
-          Генерация плана
-        </button>
+    <section className="customer-new-project-plan customer-new-project-plan--intro-loading">
+      <div className="customer-new-project-plan__loading-head">
+        <strong>Генерация плана</strong>
+        <span>Строим планы и рассчитываем сроки...</span>
       </div>
 
-      {planningPreviewVisible && (
-        <section className="customer-new-project-plan customer-new-project-plan--loading">
-          <div className="customer-new-project-plan__loading-head">
-            <strong>Генерация плана</strong>
-            <span>Строим планы и рассчитываем сроки...</span>
-          </div>
+      <div className="customer-new-project-plan__loading-center">
+        <div className="customer-new-project-plan__hero-loader" aria-hidden="true">
+          <PlanningLoadingLogo />
+        </div>
 
-          <div className="customer-new-project-plan__loading-center">
-            <div className="customer-new-project-plan__hero-loader" aria-hidden="true">
-              <PlanningLoadingLogo />
-            </div>
+        <div className="customer-new-project-plan__progress customer-new-project-plan__progress--intro">
+          {loadingProgress}%
+        </div>
 
-            <div className="customer-new-project-plan__progress">{loadingProgress}%</div>
-
-            <p className="customer-new-project-plan__note">
-              Генерация может занимать некоторое время.
-            </p>
-          </div>
-
-          <button
-            className="customer-new-project-plan__exit"
-            type="button"
-            onClick={() => setPlanningPreviewVisible(false)}
-          >
-            Выйти
-          </button>
-        </section>
-      )}
-    </div>
+        <p className="customer-new-project-plan__note">
+          Генерация может занимать некоторое время
+        </p>
+      </div>
+    </section>
   )
 }

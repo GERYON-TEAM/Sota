@@ -28,10 +28,6 @@ export type NewProjectFormValues = {
   budgetValue: string
   projectStart: string
   projectEnd: string
-  planningModelValue: string
-  planningStackValue: string
-  planningComplexityValue: string
-  planningPreviewVisible: boolean
   validationAgreement: boolean
   selectedPaymentMethod: string
   paymentCardNumber: string
